@@ -1,10 +1,11 @@
 {
+  "id": "/",
   "name": "VVH Harlingen",
   "short_name": "VVH",
   "description": "De officiële app voor VVH Harlingen volleybal.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#121212",
+  "background_color": "#e3f2fd",
   "theme_color": "#121212",
   "lang": "nl",
   "icons": [
@@ -21,7 +22,7 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
