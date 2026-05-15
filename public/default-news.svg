@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" fill="none">
+  <rect width="640" height="360" fill="#e3f2fd"/>
+  <circle cx="320" cy="140" r="48" fill="#1976d2" opacity="0.25"/>
+  <rect x="200" y="220" width="240" height="16" rx="8" fill="#bbdefb"/>
+  <rect x="240" y="250" width="160" height="12" rx="6" fill="#bbdefb"/>
+  <text x="320" y="310" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" fill="#1976d2">VVH Nieuws</text>
+</svg>
