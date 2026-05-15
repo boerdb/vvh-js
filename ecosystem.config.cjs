@@ -1,4 +1,4 @@
-/** PM2 config — gebruikt door GitHub Actions deploy */
+/** PM2 config — handmatig starten/herstarten op de server */
 module.exports = {
   apps: [
     {
