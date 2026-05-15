@@ -1,3 +1,4 @@
+/** CORS-proxy voor browser-fetch (Nevobo, clubnieuws, standen-XLSX). */
 const PROXY_BASE =
   process.env.NEXT_PUBLIC_PROXY_BASE_URL ??
   "https://weer.benswebradio.nl/proxy.php";

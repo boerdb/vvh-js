@@ -31,6 +31,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://vvh.clvs.nl"),
   title: "VVH Harlingen",
   description: "De officiële app voor VVH Harlingen volleybal.",
   manifest: "/manifest.webmanifest",

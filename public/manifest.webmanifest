@@ -4,6 +4,7 @@
   "short_name": "VVH",
   "description": "De officiële app voor VVH Harlingen volleybal.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#e3f2fd",
   "theme_color": "#121212",
