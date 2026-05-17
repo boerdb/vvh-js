@@ -18,13 +18,15 @@ function readDismissed(key: string): boolean {
 export function useInstallPrompt() {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [showIosHint, setShowIosHint] = useState(() =>
-    typeof window !== "undefined" ? shouldShowIosInstallHint() : false
-  );
-  const [dismissAndroid, setDismissAndroid] = useState(() =>
-    readDismissed(DISMISS_ANDROID)
-  );
-  const [dismissIos, setDismissIos] = useState(() => readDismissed(DISMISS_IOS));
+  const [showIosHint, setShowIosHint] = useState(false);
+  const [dismissAndroid, setDismissAndroid] = useState(false);
+  const [dismissIos, setDismissIos] = useState(false);
+
+  useEffect(() => {
+    setShowIosHint(shouldShowIosInstallHint());
+    setDismissAndroid(readDismissed(DISMISS_ANDROID));
+    setDismissIos(readDismissed(DISMISS_IOS));
+  }, []);
 
   useEffect(() => {
     const onBeforeInstall = (e: Event) => {

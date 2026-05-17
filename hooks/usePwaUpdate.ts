@@ -11,7 +11,11 @@ function readDismissed(): boolean {
 
 export function usePwaUpdate() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [dismissUpdate, setDismissUpdate] = useState(readDismissed);
+  const [dismissUpdate, setDismissUpdate] = useState(false);
+
+  useEffect(() => {
+    setDismissUpdate(readDismissed());
+  }, []);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;

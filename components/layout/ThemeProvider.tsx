@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
@@ -39,7 +40,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeSetting>("system");
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as ThemeSetting | null;
     const initial: ThemeSetting =
       stored === "light" || stored === "dark" || stored === "system"
@@ -49,7 +50,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(initial);
     setResolvedTheme(resolved);
     applyTheme(resolved);
+  }, []);
 
+  useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const onSystemChange = () => {
       const current = localStorage.getItem(STORAGE_KEY) as ThemeSetting | null;
