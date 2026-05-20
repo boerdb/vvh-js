@@ -29,11 +29,24 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
+    let active = true;
 
     async function load() {
       try {
-        const allMatches = await getProgramma();
+        const [programmaResult, vnlResult] = await Promise.allSettled([
+          getProgramma(),
+          getNationsLeagueUpcoming(3),
+        ]);
+
+        if (!active) return;
+
+        const allMatches =
+          programmaResult.status === "fulfilled" ? programmaResult.value : [];
+
+        if (programmaResult.status === "rejected") {
+          console.error(programmaResult.reason);
+        }
+
         const now = new Date();
         const sorted = [...allMatches]
           .map((match) => ({ ...match, datumObj: toDate(match.datum) }))
@@ -46,12 +59,9 @@ export default function HomePage() {
           (m) => m.datumObj!.getTime() >= now.getTime() - 86400000
         );
 
-        if (cancelled) return;
-
         if (upcoming.length > 0) {
-          const picked = upcoming.slice(0, 3);
           setMatches(
-            picked.map((m) => ({
+            upcoming.slice(0, 3).map((m) => ({
               ...m,
               locatieTekst: getLocatieLabel(m.titel),
             }))
@@ -62,26 +72,28 @@ export default function HomePage() {
         }
 
         setMatches([]);
-        const vnl = await getNationsLeagueUpcoming(3);
-        if (cancelled) return;
-
+        const vnl =
+          vnlResult.status === "fulfilled" ? vnlResult.value : [];
+        if (vnlResult.status === "rejected") {
+          console.error(vnlResult.reason);
+        }
         setVnlMatches(vnl);
         setView(vnl.length > 0 ? "vnl" : "empty");
       } catch (err) {
         console.error(err);
-        if (!cancelled) {
+        if (active) {
           setMatches([]);
           setVnlMatches([]);
           setView("empty");
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (active) setLoading(false);
       }
     }
 
     load();
     return () => {
-      cancelled = true;
+      active = false;
     };
   }, []);
 
@@ -119,7 +131,7 @@ export default function HomePage() {
             ? "Internationaal volleybal — Nations League"
             : "Komende wedstrijden (thuis en uit)"}
         </h2>
-        {view === "vnl" && (
+        {view === "vnl" && !loading && (
           <p className="page-subtitle">
             Geen VVH-wedstrijden gepland; hieronder komende Nations League-wedstrijden.
           </p>
