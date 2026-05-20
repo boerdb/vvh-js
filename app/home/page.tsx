@@ -4,9 +4,14 @@ import Image from "next/image";
 import { Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MatchCard } from "@/components/matches/MatchCard";
+import { InternationalMatchCard } from "@/components/matches/InternationalMatchCard";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { useMenu } from "@/components/layout/AppShell";
 import { getProgramma } from "@/lib/api/nevobo";
+import {
+  getNationsLeagueUpcoming,
+  type InternationalMatch,
+} from "@/lib/api/thesportsdb";
 import { getLocatieLabel, toDate } from "@/lib/parsers/rss-xml";
 import type { FeedItem } from "@/lib/types/models";
 
@@ -14,14 +19,21 @@ interface HomeMatch extends FeedItem {
   locatieTekst: "Thuis" | "Uit";
 }
 
+type HomeView = "club" | "vnl" | "empty";
+
 export default function HomePage() {
   const { openMenu } = useMenu();
   const [matches, setMatches] = useState<HomeMatch[]>([]);
+  const [vnlMatches, setVnlMatches] = useState<InternationalMatch[]>([]);
+  const [view, setView] = useState<HomeView>("club");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getProgramma()
-      .then((allMatches) => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const allMatches = await getProgramma();
         const now = new Date();
         const sorted = [...allMatches]
           .map((match) => ({ ...match, datumObj: toDate(match.datum) }))
@@ -34,18 +46,43 @@ export default function HomePage() {
           (m) => m.datumObj!.getTime() >= now.getTime() - 86400000
         );
 
-        const picked =
-          upcoming.length >= 3 ? upcoming.slice(0, 3) : sorted.slice(0, 3);
+        if (cancelled) return;
 
-        setMatches(
-          picked.map((m) => ({
-            ...m,
-            locatieTekst: getLocatieLabel(m.titel),
-          }))
-        );
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+        if (upcoming.length > 0) {
+          const picked = upcoming.slice(0, 3);
+          setMatches(
+            picked.map((m) => ({
+              ...m,
+              locatieTekst: getLocatieLabel(m.titel),
+            }))
+          );
+          setVnlMatches([]);
+          setView("club");
+          return;
+        }
+
+        setMatches([]);
+        const vnl = await getNationsLeagueUpcoming(3);
+        if (cancelled) return;
+
+        setVnlMatches(vnl);
+        setView(vnl.length > 0 ? "vnl" : "empty");
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setMatches([]);
+          setVnlMatches([]);
+          setView("empty");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -77,19 +114,33 @@ export default function HomePage() {
       </section>
 
       <section className="upcoming">
-        <h2>Komende wedstrijden (thuis en uit)</h2>
+        <h2>
+          {view === "vnl"
+            ? "Internationaal volleybal — Nations League"
+            : "Komende wedstrijden (thuis en uit)"}
+        </h2>
+        {view === "vnl" && (
+          <p className="page-subtitle">
+            Geen VVH-wedstrijden gepland; hieronder komende Nations League-wedstrijden.
+          </p>
+        )}
         {loading ? (
           <PageLoader message="Wedstrijden laden..." />
         ) : (
           <div className="cards-list">
-            {matches.map((match, i) => (
-              <MatchCard
-                key={match.link || `${match.titel}-${i}`}
-                item={match}
-                locatieLabel={match.locatieTekst}
-              />
-            ))}
-            {matches.length === 0 && (
+            {view === "club" &&
+              matches.map((match, i) => (
+                <MatchCard
+                  key={match.link || `${match.titel}-${i}`}
+                  item={match}
+                  locatieLabel={match.locatieTekst}
+                />
+              ))}
+            {view === "vnl" &&
+              vnlMatches.map((match) => (
+                <InternationalMatchCard key={match.idEvent} match={match} />
+              ))}
+            {view === "empty" && (
               <p className="empty-state">
                 Geen geplande wedstrijden binnenkort.
               </p>
