@@ -59,7 +59,7 @@ export function parseStandenFromBuffer(
     const row = rows[i];
     if (!row || row.length === 0) continue;
 
-    const firstCell = String(row[0] || "").trim();
+    const firstCell = String(row[0] ?? "").trim();
     const isTeamTitleRow =
       firstCell.startsWith(searchString) ||
       firstCell.startsWith(`"${searchString}`);
