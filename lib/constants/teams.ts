@@ -8,8 +8,8 @@ export const VVH_TEAMS: TeamOption[] = [
   { code: "HS2", label: "Heren 2" },
   { code: "DS1", label: "Dames 1" },
   { code: "DS2", label: "Dames 2" },
-  { code: "XB1", label: "Mix B1" },
-  { code: "MA1", label: "Meisjes A1" },
+  { code: "XA1", label: "Mix A1" },
+  { code: "MB1", label: "Meisjes B1" },
   { code: "MC1", label: "Meisjes C1" },
 ];
 

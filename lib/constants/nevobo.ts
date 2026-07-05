@@ -5,8 +5,8 @@ export const NEVOBO_VERENIGING_ID =
 const TEAM_SEGMENTS: Record<string, string> = {
   HS: "heren",
   DS: "dames",
-  XB: "mix-b",
-  MA: "meiden-a",
+  XA: "mix-a",
+  MB: "meiden-b",
   MC: "meiden-c",
 };
 

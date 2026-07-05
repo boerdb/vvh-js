@@ -17,7 +17,7 @@ is daarmee **niet meer nodig** voor VVH.
 | `GET /api/standen?team=HS1` | Nevobo standen (XLSX → JSON) |
 | `GET /api/nations-league?limit=3` | TheSportsDB Nations League (fallback homepage) |
 
-Teamcodes in de URL: `HS1`, `DS2`, `XB1`, `MA1`, `MC1`, enz.
+Teamcodes in de URL: `HS1`, `DS2`, `XA1`, `MB1`, `MC1`, enz.
 
 ## Omgevingsvariabelen
 
@@ -36,7 +36,7 @@ Standaard is `CKL6L32` (VVH Harlingen) al ingebouwd; alleen zetten als dat ooit 
 De logica staat in `lib/constants/nevobo.ts` en komt overeen met de oude `proxy.php`:
 
 - Programma: `https://api.nevobo.nl/export/vereniging/CKL6L32/programma.rss`
-- Team: `https://api.nevobo.nl/export/team/CKL6L32/{heren\|dames\|mix-b\|meiden-*}/{nr}/programma.rss`
+- Team: `https://api.nevobo.nl/export/team/CKL6L32/{heren\|dames\|mix-a\|meiden-*}/{nr}/programma.rss`
 - Standen: `https://api.nevobo.nl/export/vereniging/CKL6L32/stand.xlsx`
 
 Upstream-responses worden **5 minuten** gecached (`revalidate: 300` in `lib/server/upstream.ts`).
