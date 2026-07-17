@@ -4,7 +4,9 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { StandingsTable } from "@/components/standings/StandingsTable";
+import { NevoboTeamEmptyState } from "@/components/team/NevoboTeamEmptyState";
 import { getStanden } from "@/lib/api/team";
+import { getTeamLabel } from "@/lib/constants/teams";
 import type { StandenResult } from "@/lib/types/models";
 
 function TeamStandenContent({ code }: { code: string }) {
@@ -28,6 +30,18 @@ function TeamStandenContent({ code }: { code: string }) {
 
   if (loading) return <PageLoader message="Standen laden..." />;
   if (!result) return <p className="empty-state">Kon standen niet laden.</p>;
+
+  const hasStandRows = result.standen.some((row) => !row.isDivider);
+  if (!hasStandRows) {
+    return (
+      <>
+        <h1 className="page-title">Stand {code}</h1>
+        <p className="page-subtitle">{getTeamLabel(code)}</p>
+        <NevoboTeamEmptyState teamCode={code} kind="standen" />
+      </>
+    );
+  }
+
   return <StandingsTable teamCode={code} result={result} />;
 }
 
