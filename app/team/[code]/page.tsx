@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { PageLoader } from "@/components/layout/PageLoader";
-import { NevoboTeamEmptyState } from "@/components/team/NevoboTeamEmptyState";
 import { getTeamResultaten } from "@/lib/api/team";
 import { getTeamLabel } from "@/lib/constants/teams";
 import type { FeedItem } from "@/lib/types/models";
@@ -40,7 +39,7 @@ function TeamResultatenContent({ code }: { code: string }) {
             <MatchCard key={item.link || `${item.titel}-${i}`} item={item} />
           ))}
           {items.length === 0 && (
-            <NevoboTeamEmptyState teamCode={code} kind="uitslagen" />
+            <p className="empty-state">Geen uitslagen gevonden.</p>
           )}
         </div>
       )}
