@@ -77,7 +77,7 @@ export default function InfoPage() {
       </article>
 
       <p className="copyright-text">
-        © 2026 Clinical Vision | V 1.0.0 | Alle rechten voorbehouden.
+        © 2026 Clinical Vision | V 1.1.2 | Alle rechten voorbehouden.
       </p>
     </div>
   );
