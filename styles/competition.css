@@ -188,9 +188,9 @@
   font-weight: 700;
 }
 
-.poule-divider-row td {
+.stand-table tbody tr.poule-divider-row td {
   background: linear-gradient(90deg, #1f4db3 0%, #2d63cc 100%);
-  color: #fff;
+  color: #ffd700;
   font-weight: 700;
   text-align: center;
   padding: 0.55rem;
@@ -205,7 +205,7 @@
 }
 
 .col-team {
-  width: 44%;
+  width: 50%;
   min-width: 5rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -214,22 +214,19 @@
 
 .col-wed,
 .col-ptn {
-  width: 14%;
-  min-width: 2.35rem;
-  text-align: center;
+  width: 12%;
+  min-width: 2.1rem;
+  text-align: left;
   white-space: nowrap;
 }
 
 .col-sets {
-  width: 18%;
-  min-width: 3.5rem;
-  text-align: center;
+  width: 16%;
+  min-width: 3.25rem;
+  text-align: left;
   white-space: nowrap;
 }
 
-.stand-table th.col-wed,
-.stand-table th.col-ptn,
-.stand-table th.col-sets,
 .stand-table th.col-rank {
   text-align: center;
 }

@@ -77,11 +77,11 @@ export function StandingsTable({
                   key={`${row.team}-${row.rank}-${index}`}
                   className={row.isVVH ? "highlight-vvh" : undefined}
                 >
-                  <td>{row.rank}</td>
-                  <td>{row.team}</td>
-                  <td>{row.wedstrijden}</td>
-                  <td>{row.punten}</td>
-                  <td>{row.sets}</td>
+                  <td className="col-rank">{row.rank}</td>
+                  <td className="col-team">{row.team}</td>
+                  <td className="col-wed">{row.wedstrijden}</td>
+                  <td className="col-ptn">{row.punten}</td>
+                  <td className="col-sets">{row.sets}</td>
                 </tr>
               )
             )}
