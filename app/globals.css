@@ -112,9 +112,10 @@ body {
   flex: 1;
   min-height: 0;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  transform: translateZ(0);
   background: var(--shell-page-bg);
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
@@ -351,31 +352,6 @@ body {
 .menu-item svg {
   flex-shrink: 0;
   opacity: 0.85;
-}
-
-.submenu-list {
-  background: #121212;
-  margin: 0 0.5rem 0.25rem 1rem;
-  border-left: 2px solid #333;
-  border-radius: 0 0 8px 8px;
-  padding: 0.25rem 0;
-}
-
-.dark .submenu-list {
-  background: #0a0a0a;
-}
-
-.submenu-item {
-  display: block;
-  padding: 0.45rem 0.75rem 0.45rem 1.25rem;
-  color: var(--shell-menu-text);
-  text-decoration: none;
-  font-size: 0.875rem;
-}
-
-.submenu-item:hover,
-.submenu-item.active {
-  background: var(--shell-menu-selected);
 }
 
 .menu-theme-row {

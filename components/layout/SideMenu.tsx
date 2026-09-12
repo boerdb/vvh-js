@@ -11,11 +11,8 @@ import {
   Users,
   Medal,
   Globe,
-  ChevronDown,
-  ChevronRight,
 } from "lucide-react";
-import { useCallback, useState } from "react";
-import { VVH_TEAMS } from "@/lib/constants/teams";
+import { useEffect, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const iconMap = {
@@ -35,8 +32,6 @@ interface MenuPage {
   title: string;
   url: string;
   icon: PageKey;
-  submenu?: typeof VVH_TEAMS;
-  teamRoute?: string;
 }
 
 const APP_PAGES: MenuPage[] = [
@@ -45,20 +40,8 @@ const APP_PAGES: MenuPage[] = [
   { title: "Nevobo Nieuws", url: "/nevobo-nieuws", icon: "nevobo" },
   { title: "Programma", url: "/programma", icon: "programma" },
   { title: "Thuis Wedstrijden", url: "/waddenhal", icon: "waddenhal" },
-  {
-    title: "Uitslagen",
-    url: "/teams",
-    icon: "uitslagen",
-    teamRoute: "/team",
-    submenu: VVH_TEAMS,
-  },
-  {
-    title: "Standen",
-    url: "/standen",
-    icon: "standen",
-    teamRoute: "/standen",
-    submenu: VVH_TEAMS,
-  },
+  { title: "Uitslagen", url: "/teams", icon: "uitslagen" },
+  { title: "Standen", url: "/standen", icon: "standen" },
   { title: "Info", url: "/info", icon: "info" },
 ];
 
@@ -69,14 +52,16 @@ interface SideMenuProps {
 
 export function SideMenu({ open, onClose }: SideMenuProps) {
   const pathname = usePathname();
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  const toggleSubmenu = useCallback((title: string) => {
-    setOpenSubmenu((prev) => (prev === title ? null : title));
+  useEffect(() => {
+    setMounted(true);
   }, []);
 
   const isActive = (url: string) =>
     pathname === url || pathname.startsWith(`${url}/`);
+
+  if (!mounted) return null;
 
   return (
     <>
@@ -94,55 +79,16 @@ export function SideMenu({ open, onClose }: SideMenuProps) {
         <div className="side-menu-nav">
           {APP_PAGES.map((page) => {
             const Icon = iconMap[page.icon];
-            if (!page.submenu) {
-              return (
-                <Link
-                  key={page.title}
-                  href={page.url}
-                  className={`menu-item ${isActive(page.url) ? "active" : ""}`}
-                  onClick={onClose}
-                >
-                  <Icon size={20} />
-                  <span>{page.title}</span>
-                </Link>
-              );
-            }
-
-            const expanded = openSubmenu === page.title;
             return (
-              <div key={page.title}>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => toggleSubmenu(page.title)}
-                >
-                  <Icon size={20} />
-                  <span style={{ flex: 1 }}>{page.title}</span>
-                  {expanded ? (
-                    <ChevronDown size={18} />
-                  ) : (
-                    <ChevronRight size={18} />
-                  )}
-                </button>
-                {expanded && page.teamRoute && (
-                  <div className="submenu-list">
-                    {page.submenu.map((team) => (
-                      <Link
-                        key={team.code}
-                        href={`${page.teamRoute}/${team.code}`}
-                        className={`submenu-item ${
-                          pathname === `${page.teamRoute}/${team.code}`
-                            ? "active"
-                            : ""
-                        }`}
-                        onClick={onClose}
-                      >
-                        {team.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Link
+                key={page.title}
+                href={page.url}
+                className={`menu-item ${isActive(page.url) ? "active" : ""}`}
+                onClick={onClose}
+              >
+                <Icon size={20} />
+                <span>{page.title}</span>
+              </Link>
             );
           })}
           <div className="menu-theme-row">

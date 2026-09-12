@@ -10,6 +10,7 @@ is daarmee **niet meer nodig** voor VVH.
 | Route | Bron |
 |-------|------|
 | `GET /api/programma` | Nevobo verenigingsprogramma (RSS) |
+| `GET /api/resultaten` | Nevobo verenigingsuitslagen (RSS) |
 | `GET /api/nevobo-nieuws` | Nevobo algemeen nieuws (RSS) |
 | `GET /api/news` | WordPress clubnieuws (JSON) |
 | `GET /api/team/{code}/programma` | Nevobo teamprogramma (RSS) |
@@ -39,7 +40,7 @@ De logica staat in `lib/constants/nevobo.ts` en komt overeen met de oude `proxy.
 - Team: `https://api.nevobo.nl/export/team/CKL6L32/{heren\|dames\|mix-a\|meiden-*}/{nr}/programma.rss`
 - Standen: `https://api.nevobo.nl/export/vereniging/CKL6L32/stand.xlsx`
 
-Upstream-responses worden **5 minuten** gecached (`revalidate: 300` in `lib/server/upstream.ts`).
+Upstream-responses worden **60 seconden** gecached (`revalidate: 60` in `lib/server/upstream.ts`).
 
 ## Deploy-stappen
 
@@ -55,8 +56,9 @@ Upstream-responses worden **5 minuten** gecached (`revalidate: 300` in `lib/serv
    pm2 restart vvh-js   # of de naam uit ecosystem.config.cjs
    ```
 5. Controleer na deploy:
-   - `https://vvh.clvs.nl/api/programma` → JSON-array (kan leeg zijn buiten seizoen)
-   - `https://vvh.clvs.nl/api/standen?team=HS1` → JSON met `standen` / `poule`
+  - `https://vvh.clvs.nl/api/programma` → JSON-array (kan leeg zijn buiten seizoen)
+  - `https://vvh.clvs.nl/api/resultaten` → JSON-array met recente uitslagen
+  - `https://vvh.clvs.nl/api/standen?team=HS1` → JSON met `standen` / `poule`
    - Homepage zonder clubwedstrijden → Nations League-kaarten (via `/api/nations-league`)
 
 ## Nations League (homepage)

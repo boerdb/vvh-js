@@ -28,6 +28,10 @@ export function nevoboProgrammaUrl(): string {
   return `${NEVOBO_API}/vereniging/${NEVOBO_VERENIGING_ID}/programma.rss`;
 }
 
+export function nevoboResultatenUrl(): string {
+  return `${NEVOBO_API}/vereniging/${NEVOBO_VERENIGING_ID}/resultaten.rss`;
+}
+
 export function nevoboTeamProgrammaUrl(teamCode: string): string {
   return `${NEVOBO_API}/team/${NEVOBO_VERENIGING_ID}/${teamNevoboPath(teamCode)}/programma.rss`;
 }

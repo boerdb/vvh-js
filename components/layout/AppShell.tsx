@@ -44,6 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="menu-btn"
               onClick={openMenu}
               aria-label="Menu openen"
+              suppressHydrationWarning
             >
               <Menu size={24} />
             </button>

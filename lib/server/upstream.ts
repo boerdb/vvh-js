@@ -1,4 +1,4 @@
-const REVALIDATE_SECONDS = 300;
+const REVALIDATE_SECONDS = 60;
 
 export async function fetchUpstreamText(url: string): Promise<string> {
   const res = await fetch(url, {

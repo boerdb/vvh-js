@@ -105,6 +105,7 @@ export default function HomePage() {
           className="hero-menu-btn"
           onClick={openMenu}
           aria-label="Menu openen"
+          suppressHydrationWarning
         >
           <Menu size={24} />
         </button>

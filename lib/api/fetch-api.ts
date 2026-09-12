@@ -2,6 +2,7 @@ const API_TIMEOUT_MS = 25_000;
 
 export async function fetchApiJson<T>(path: string): Promise<T> {
   const res = await fetch(path, {
+    cache: "no-store",
     signal: AbortSignal.timeout(API_TIMEOUT_MS),
   });
   if (!res.ok) {

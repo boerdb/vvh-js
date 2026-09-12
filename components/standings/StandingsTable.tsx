@@ -4,9 +4,14 @@ import { formatTeamCode, getTeamLabel } from "@/lib/constants/teams";
 interface StandingsTableProps {
   teamCode: string;
   result: StandenResult;
+  hideHeading?: boolean;
 }
 
-export function StandingsTable({ teamCode, result }: StandingsTableProps) {
+export function StandingsTable({
+  teamCode,
+  result,
+  hideHeading = false,
+}: StandingsTableProps) {
   const rows = result.standen || [];
   const vvhRow = rows.find(
     (row): row is StandingRow => !row.isDivider && row.isVVH
@@ -17,10 +22,14 @@ export function StandingsTable({ teamCode, result }: StandingsTableProps) {
   return (
     <div className="standen-container">
       <div className="standen-header">
-        <h2 className="section-title-comp">Stand {teamCode.toUpperCase()}</h2>
-        <p className="section-subtitle-comp">
-          Huidige stand voor {getTeamLabel(teamCode) || formatTeamCode(teamCode)}
-        </p>
+        {!hideHeading && (
+          <>
+            <h2 className="section-title-comp">Stand {teamCode.toUpperCase()}</h2>
+            <p className="section-subtitle-comp">
+              Huidige stand voor {getTeamLabel(teamCode) || formatTeamCode(teamCode)}
+            </p>
+          </>
+        )}
 
         <div className="meta-grid">
           <div className="meta-item meta-item-poule">

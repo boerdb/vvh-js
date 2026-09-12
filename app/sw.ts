@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+import { ExpirationPlugin, NetworkFirst, Serwist } from "serwist";
 
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
@@ -16,7 +16,25 @@ const serwist = new Serwist({
   skipWaiting: false,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: defaultCache,
+  runtimeCaching: [
+    {
+      matcher: ({ sameOrigin, url: { pathname } }) =>
+        sameOrigin && pathname.startsWith("/api/"),
+      method: "GET",
+      handler: new NetworkFirst({
+        cacheName: "apis",
+        networkTimeoutSeconds: 25,
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 32,
+            maxAgeSeconds: 60,
+            maxAgeFrom: "last-used",
+          }),
+        ],
+      }),
+    },
+    ...defaultCache,
+  ],
 });
 
 self.addEventListener("message", (event) => {

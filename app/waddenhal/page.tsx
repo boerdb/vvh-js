@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { PageLoader } from "@/components/layout/PageLoader";
+import { TeamFilter } from "@/components/layout/TeamFilter";
 import { getProgramma } from "@/lib/api/nevobo";
-import { VVH_TEAMS } from "@/lib/constants/teams";
+import { getTeamLabel } from "@/lib/constants/teams";
 import { matchesVvhTeam } from "@/lib/parsers/rss-xml";
 import type { FeedItem } from "@/lib/types/models";
-
-const ALL_TEAMS = "ALL";
+import { useFeedLoader } from "@/hooks/useFeedLoader";
+import { ALL_TEAMS, useTeamFilter } from "@/hooks/useTeamFilter";
 
 function isWaddenhalMatch(item: FeedItem): boolean {
   const t = (item.titel || "").toLowerCase();
@@ -16,17 +17,13 @@ function isWaddenhalMatch(item: FeedItem): boolean {
   return t.includes("waddenhal") || o.includes("waddenhal");
 }
 
-export default function WaddenhalPage() {
-  const [items, setItems] = useState<FeedItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [teamFilter, setTeamFilter] = useState(ALL_TEAMS);
-
-  useEffect(() => {
-    getProgramma()
-      .then((all) => setItems(all.filter(isWaddenhalMatch)))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+function WaddenhalContent() {
+  const loader = useCallback(
+    () => getProgramma().then((all) => all.filter(isWaddenhalMatch)),
+    []
+  );
+  const { data: items, loading } = useFeedLoader<FeedItem[]>(loader, []);
+  const { teamFilter, setTeamFilter } = useTeamFilter();
 
   const filtered = useMemo(() => {
     if (teamFilter === ALL_TEAMS) return items;
@@ -36,7 +33,7 @@ export default function WaddenhalPage() {
   const selectedLabel =
     teamFilter === ALL_TEAMS
       ? "Wedstrijden in de Waddenhal"
-      : `${VVH_TEAMS.find((t) => t.code === teamFilter)?.label ?? teamFilter} in de Waddenhal`;
+      : `${getTeamLabel(teamFilter)} in de Waddenhal`;
 
   return (
     <div className="page-container">
@@ -45,22 +42,7 @@ export default function WaddenhalPage() {
           <h1 className="page-title">Thuis Wedstrijden</h1>
           <p className="page-subtitle">{selectedLabel}</p>
         </div>
-        <label className="team-filter">
-          <span className="team-filter-label">Team</span>
-          <select
-            className="team-filter-select"
-            value={teamFilter}
-            onChange={(e) => setTeamFilter(e.target.value)}
-            aria-label="Filter op team"
-          >
-            <option value={ALL_TEAMS}>Alle teams</option>
-            {VVH_TEAMS.map((team) => (
-              <option key={team.code} value={team.code}>
-                {team.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <TeamFilter value={teamFilter} onChange={setTeamFilter} />
       </div>
       {loading ? (
         <PageLoader message="Wedstrijden laden..." />
@@ -79,5 +61,13 @@ export default function WaddenhalPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function WaddenhalPage() {
+  return (
+    <Suspense fallback={<PageLoader message="Wedstrijden laden..." />}>
+      <WaddenhalContent />
+    </Suspense>
   );
 }
