@@ -2,17 +2,19 @@
 
 import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { VVH_TEAMS } from "@/lib/constants/teams";
+import { VVH_TEAMS, type TeamOption } from "@/lib/constants/teams";
 
 export const ALL_TEAMS = "ALL";
 
 export function useTeamFilter(options?: {
   allowAll?: boolean;
   defaultTeam?: string;
+  teams?: TeamOption[];
 }) {
+  const teams = options?.teams ?? VVH_TEAMS;
   const allowAll = options?.allowAll ?? true;
   const defaultTeam =
-    options?.defaultTeam ?? (allowAll ? ALL_TEAMS : VVH_TEAMS[0].code);
+    options?.defaultTeam ?? (allowAll ? ALL_TEAMS : teams[0].code);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -20,9 +22,9 @@ export function useTeamFilter(options?: {
   const teamFilter = useMemo(() => {
     const raw = searchParams.get("team")?.toUpperCase() ?? "";
     if (allowAll && (raw === "" || raw === ALL_TEAMS)) return ALL_TEAMS;
-    if (VVH_TEAMS.some((team) => team.code === raw)) return raw;
+    if (teams.some((team) => team.code === raw)) return raw;
     return defaultTeam;
-  }, [allowAll, defaultTeam, searchParams]);
+  }, [allowAll, defaultTeam, searchParams, teams]);
 
   const setTeamFilter = useCallback(
     (code: string) => {
