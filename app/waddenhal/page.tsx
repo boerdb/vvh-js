@@ -5,7 +5,7 @@ import { MatchCard } from "@/components/matches/MatchCard";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import { getProgramma } from "@/lib/api/nevobo";
-import { getTeamLabel } from "@/lib/constants/teams";
+import { getTeamLabel, VVH_WEDSTRIJD_TEAMS } from "@/lib/constants/teams";
 import { matchesVvhTeam } from "@/lib/parsers/rss-xml";
 import type { FeedItem } from "@/lib/types/models";
 import { useFeedLoader } from "@/hooks/useFeedLoader";
@@ -23,7 +23,9 @@ function WaddenhalContent() {
     []
   );
   const { data: items, loading } = useFeedLoader<FeedItem[]>(loader, []);
-  const { teamFilter, setTeamFilter } = useTeamFilter();
+  const { teamFilter, setTeamFilter } = useTeamFilter({
+    teams: VVH_WEDSTRIJD_TEAMS,
+  });
 
   const filtered = useMemo(() => {
     if (teamFilter === ALL_TEAMS) return items;
@@ -42,7 +44,11 @@ function WaddenhalContent() {
           <h1 className="page-title">Thuis Wedstrijden</h1>
           <p className="page-subtitle">{selectedLabel}</p>
         </div>
-        <TeamFilter value={teamFilter} onChange={setTeamFilter} />
+        <TeamFilter
+          value={teamFilter}
+          onChange={setTeamFilter}
+          teams={VVH_WEDSTRIJD_TEAMS}
+        />
       </div>
       {loading ? (
         <PageLoader message="Wedstrijden laden..." />

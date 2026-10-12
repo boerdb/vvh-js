@@ -77,9 +77,12 @@ export default function InfoPage() {
       </article>
 
       <p className="copyright-text">
-        © 2026 Clinical Vision | V 1.1.3 | Alle rechten voorbehouden.
+        © 2026 Clinical Vision | V 1.1.4 | Alle rechten voorbehouden.
       </p>
       <p className="version-notes">
+        1.1.4 — Volley Stars L4 1 als filter in programma en thuiswedstrijden
+        (niet in standen; het is een bloktoernooi).
+        <br />
         1.1.3 — Meisjes A1 (combinatie Dosko/Acta) toegevoegd aan programma,
         uitslagen en standen.
       </p>

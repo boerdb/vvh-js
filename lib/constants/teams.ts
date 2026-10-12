@@ -29,7 +29,8 @@ export const VVH_VOLLEY_STARS_TEAMS: TeamOption[] = [
   { code: "L41", label: "Volley Stars L4 1" },
 ];
 
-export const VVH_UITSLAGEN_TEAMS: TeamOption[] = [
+/** Programma, thuiswedstrijden en uitslagen. Geen standen: L4 is bloktoernooi. */
+export const VVH_WEDSTRIJD_TEAMS: TeamOption[] = [
   ...VVH_TEAMS,
   ...VVH_VOLLEY_STARS_TEAMS,
 ];
@@ -39,11 +40,11 @@ const TEAM_PREFIXES = ["L4", "HS", "DS", "XA", "MA", "MB", "MC"];
 
 export function getTeamOption(code: string): TeamOption | undefined {
   const normalized = String(code || "").toUpperCase().replace(/\s+/g, "");
-  return VVH_UITSLAGEN_TEAMS.find((team) => team.code === normalized);
+  return VVH_WEDSTRIJD_TEAMS.find((team) => team.code === normalized);
 }
 
 export function getCombinationTeams(): TeamOption[] {
-  return VVH_UITSLAGEN_TEAMS.filter((team) => Boolean(team.verenigingId));
+  return VVH_WEDSTRIJD_TEAMS.filter((team) => Boolean(team.verenigingId));
 }
 
 export function parseTeamCode(
@@ -80,7 +81,7 @@ export function getNevoboTeamName(code: string): string {
 export function getTeamLabel(code: string): string {
   const normalized = code.toUpperCase();
   return (
-    VVH_UITSLAGEN_TEAMS.find((t) => t.code === normalized)?.label ??
+    VVH_WEDSTRIJD_TEAMS.find((t) => t.code === normalized)?.label ??
     formatTeamCode(code)
   );
 }

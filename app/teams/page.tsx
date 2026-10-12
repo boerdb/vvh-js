@@ -5,7 +5,7 @@ import { MatchCard } from "@/components/matches/MatchCard";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import { getResultaten } from "@/lib/api/nevobo";
-import { getTeamLabel, VVH_UITSLAGEN_TEAMS } from "@/lib/constants/teams";
+import { getTeamLabel, VVH_WEDSTRIJD_TEAMS } from "@/lib/constants/teams";
 import { matchesVvhTeam } from "@/lib/parsers/rss-xml";
 import type { FeedItem } from "@/lib/types/models";
 import { useFeedLoader } from "@/hooks/useFeedLoader";
@@ -15,7 +15,7 @@ function UitslagenContent() {
   const loader = useCallback(() => getResultaten(), []);
   const { data: items, loading } = useFeedLoader<FeedItem[]>(loader, []);
   const { teamFilter, setTeamFilter } = useTeamFilter({
-    teams: VVH_UITSLAGEN_TEAMS,
+    teams: VVH_WEDSTRIJD_TEAMS,
   });
 
   const filtered = useMemo(() => {
@@ -38,7 +38,7 @@ function UitslagenContent() {
         <TeamFilter
           value={teamFilter}
           onChange={setTeamFilter}
-          teams={VVH_UITSLAGEN_TEAMS}
+          teams={VVH_WEDSTRIJD_TEAMS}
         />
       </div>
       {loading ? (
