@@ -1,14 +1,9 @@
 import * as XLSX from "xlsx";
+import { getNevoboTeamName } from "@/lib/constants/teams";
 import type { StandenResult, StandingEntry } from "@/lib/types/models";
 
-function normalizeStandenTeamCode(teamCode: string): string {
-  const normalizedCode = String(teamCode || "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "");
-  const match = normalizedCode.match(/^([A-Z]+)(\d+)$/);
-  if (!match) return String(teamCode || "").trim();
-  return `V.V.H. ${match[1]} ${match[2]}`;
+function clubPrefixFromSearch(searchString: string): string {
+  return searchString.replace(/\s+[A-Z0-9]+ \d+\s*$/i, "").trim() || "V.V.H.";
 }
 
 function extractPouleFromTitleRow(row: unknown[], searchString: string): string {
@@ -48,7 +43,8 @@ export function parseStandenFromBuffer(
   const worksheet = workbook.Sheets[firstSheetName];
   const rows: unknown[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-  const searchString = normalizeStandenTeamCode(teamCode);
+  const searchString = getNevoboTeamName(teamCode);
+  const clubPrefix = clubPrefixFromSearch(searchString);
 
   let isCorrectTeam = false;
   const standenLijst: StandingEntry[] = [];
@@ -85,7 +81,10 @@ export function parseStandenFromBuffer(
     }
 
     if (isCorrectTeam) {
-      if (firstCell.startsWith("V.V.H.") && !firstCell.startsWith(searchString))
+      if (
+        firstCell.startsWith(clubPrefix) &&
+        !firstCell.startsWith(searchString)
+      )
         break;
 
       if (firstCell === "" || firstCell === "undefined") {
@@ -102,7 +101,7 @@ export function parseStandenFromBuffer(
           wedstrijden: String(row[2] ?? ""),
           punten: String(row[3] ?? ""),
           sets: `${row[4]}-${row[5]}`,
-          isVVH: String(row[1]).includes("V.V.H."),
+          isVVH: String(row[1]).includes(searchString),
         });
       }
     }

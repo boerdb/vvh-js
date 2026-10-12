@@ -1,3 +1,5 @@
+import { getTeamOption } from "@/lib/constants/teams";
+
 /** VVH-verenigingscode bij Nevobo (zelfde als in de oude proxy.php). */
 export const NEVOBO_VERENIGING_ID =
   process.env.NEVOBO_VERENIGING_ID ?? "CKL6L32";
@@ -6,6 +8,7 @@ const TEAM_SEGMENTS: Record<string, string> = {
   HS: "heren",
   DS: "dames",
   XA: "mix-a",
+  MA: "meiden-a",
   MB: "meiden-b",
   MC: "meiden-c",
 };
@@ -22,6 +25,10 @@ export function teamNevoboPath(teamCode: string): string {
   return `${segment}/${match[2]}`;
 }
 
+export function teamVerenigingId(teamCode: string): string {
+  return getTeamOption(teamCode)?.verenigingId ?? NEVOBO_VERENIGING_ID;
+}
+
 const NEVOBO_API = "https://api.nevobo.nl/export";
 
 export function nevoboProgrammaUrl(): string {
@@ -33,15 +40,15 @@ export function nevoboResultatenUrl(): string {
 }
 
 export function nevoboTeamProgrammaUrl(teamCode: string): string {
-  return `${NEVOBO_API}/team/${NEVOBO_VERENIGING_ID}/${teamNevoboPath(teamCode)}/programma.rss`;
+  return `${NEVOBO_API}/team/${teamVerenigingId(teamCode)}/${teamNevoboPath(teamCode)}/programma.rss`;
 }
 
 export function nevoboTeamResultatenUrl(teamCode: string): string {
-  return `${NEVOBO_API}/team/${NEVOBO_VERENIGING_ID}/${teamNevoboPath(teamCode)}/resultaten.rss`;
+  return `${NEVOBO_API}/team/${teamVerenigingId(teamCode)}/${teamNevoboPath(teamCode)}/resultaten.rss`;
 }
 
-export function nevoboStandenUrl(): string {
-  return `${NEVOBO_API}/vereniging/${NEVOBO_VERENIGING_ID}/stand.xlsx`;
+export function nevoboStandenUrl(verenigingId = NEVOBO_VERENIGING_ID): string {
+  return `${NEVOBO_API}/vereniging/${verenigingId}/stand.xlsx`;
 }
 
 export const NEVOBO_NIEUWS_URL = "https://api.nevobo.nl/export/nieuws.rss";

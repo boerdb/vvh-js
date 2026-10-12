@@ -77,7 +77,11 @@ export default function InfoPage() {
       </article>
 
       <p className="copyright-text">
-        © 2026 Clinical Vision | V 1.1.2 | Alle rechten voorbehouden.
+        © 2026 Clinical Vision | V 1.1.3 | Alle rechten voorbehouden.
+      </p>
+      <p className="version-notes">
+        1.1.3 — Meisjes A1 (combinatie Dosko/Acta) toegevoegd aan programma,
+        uitslagen en standen.
       </p>
     </div>
   );

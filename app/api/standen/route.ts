@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { nevoboStandenUrl } from "@/lib/constants/nevobo";
+import { nevoboStandenUrl, teamVerenigingId } from "@/lib/constants/nevobo";
 import { parseStandenFromBuffer } from "@/lib/parsers/standen-xlsx";
 import { upstreamErrorResponse } from "@/lib/server/api-error";
 import { fetchUpstreamBuffer } from "@/lib/server/upstream";
@@ -13,7 +13,9 @@ export async function GET(request: Request) {
         { status: 400 }
       );
     }
-    const buffer = await fetchUpstreamBuffer(nevoboStandenUrl());
+    const buffer = await fetchUpstreamBuffer(
+      nevoboStandenUrl(teamVerenigingId(team))
+    );
     return NextResponse.json(parseStandenFromBuffer(buffer, team));
   } catch (error) {
     return upstreamErrorResponse(error);

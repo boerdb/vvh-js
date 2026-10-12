@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
-import { nevoboResultatenUrl } from "@/lib/constants/nevobo";
-import { parseRssItems } from "@/lib/parsers/rss-parse-server";
 import { upstreamErrorResponse } from "@/lib/server/api-error";
-import { fetchUpstreamText } from "@/lib/server/upstream";
+import { fetchClubResultaten } from "@/lib/server/club-feeds";
 
 export async function GET() {
   try {
-    const xml = await fetchUpstreamText(nevoboResultatenUrl());
-    return NextResponse.json(parseRssItems(xml));
+    return NextResponse.json(await fetchClubResultaten());
   } catch (error) {
     return upstreamErrorResponse(error);
   }
