@@ -17,12 +17,18 @@ export function pushEnabled(): boolean {
     configured = false;
     return configured;
   }
-  webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || "https://vvh.clvs.nl",
-    publicKey,
-    privateKey
-  );
-  configured = true;
+  try {
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT || "https://vvh.clvs.nl",
+      publicKey,
+      privateKey
+    );
+    configured = true;
+  } catch (error) {
+    // Ongeldige sleutel: alleen meldingen uit, de app zelf moet gewoon starten.
+    console.error("[push] ongeldige VAPID-sleutels", error);
+    configured = false;
+  }
   return configured;
 }
 
