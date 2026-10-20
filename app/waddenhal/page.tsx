@@ -1,36 +1,38 @@
 "use client";
 
 import { Suspense, useCallback, useMemo } from "react";
-import { MatchCard } from "@/components/matches/MatchCard";
+import { MatchList } from "@/components/matches/MatchList";
 import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
+import { StaleNotice } from "@/components/layout/StaleNotice";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import { getProgramma } from "@/lib/api/nevobo";
 import { getTeamLabel, VVH_WEDSTRIJD_TEAMS } from "@/lib/constants/teams";
+import { parseMatch } from "@/lib/parsers/match";
 import { matchesVvhTeam } from "@/lib/parsers/rss-xml";
 import type { FeedItem } from "@/lib/types/models";
 import { useFeedLoader } from "@/hooks/useFeedLoader";
 import { ALL_TEAMS, useTeamFilter } from "@/hooks/useTeamFilter";
 
-function isWaddenhalMatch(item: FeedItem): boolean {
+function isGeplandInWaddenhal(item: FeedItem): boolean {
   const t = (item.titel || "").toLowerCase();
   const o = (item.omschrijving || "").toLowerCase();
-  return t.includes("waddenhal") || o.includes("waddenhal");
+  if (!t.includes("waddenhal") && !o.includes("waddenhal")) return false;
+  return !parseMatch(item)?.uitslag;
 }
 
 function WaddenhalContent() {
-  const loader = useCallback(
-    () => getProgramma().then((all) => all.filter(isWaddenhalMatch)),
-    []
-  );
-  const { data: items, loading, error, reload } = useFeedLoader<FeedItem[]>(loader, []);
+  const loader = useCallback(() => getProgramma(), []);
+  const { data: items, loading, error, reload, fetchedAt } =
+    useFeedLoader<FeedItem[]>(loader, []);
   const { teamFilter, setTeamFilter } = useTeamFilter({
     teams: VVH_WEDSTRIJD_TEAMS,
   });
 
   const filtered = useMemo(() => {
-    if (teamFilter === ALL_TEAMS) return items;
-    return items.filter((item) => matchesVvhTeam(item, teamFilter));
+    const thuis = items.filter(isGeplandInWaddenhal);
+    if (teamFilter === ALL_TEAMS) return thuis;
+    return thuis.filter((item) => matchesVvhTeam(item, teamFilter));
   }, [items, teamFilter]);
 
   const selectedLabel =
@@ -51,23 +53,20 @@ function WaddenhalContent() {
           teams={VVH_WEDSTRIJD_TEAMS}
         />
       </div>
+      <StaleNotice fetchedAt={fetchedAt} />
       {loading ? (
         <PageLoader message="Wedstrijden laden..." />
       ) : error ? (
         <ErrorState message="Kon de thuiswedstrijden niet laden." onRetry={reload} />
       ) : (
-        <div className="cards-list">
-          {filtered.map((item, i) => (
-            <MatchCard key={item.link || `${item.titel}-${i}`} item={item} />
-          ))}
-          {filtered.length === 0 && (
-            <p className="empty-state">
-              {teamFilter === ALL_TEAMS
-                ? "Er zijn momenteel geen wedstrijden in de Waddenhal."
-                : "Geen thuiswedstrijden gevonden voor dit team."}
-            </p>
-          )}
-        </div>
+        <MatchList
+          items={filtered}
+          emptyText={
+            teamFilter === ALL_TEAMS
+              ? "Er zijn momenteel geen wedstrijden in de Waddenhal."
+              : "Geen thuiswedstrijden gevonden voor dit team."
+          }
+        />
       )}
     </div>
   );

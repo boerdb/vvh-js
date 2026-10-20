@@ -1,21 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSessionFlag } from "@/hooks/useSessionFlag";
 
 const DISMISS_UPDATE = "vvh-dismiss-update";
 
-function readDismissed(): boolean {
-  if (typeof window === "undefined") return false;
-  return sessionStorage.getItem(DISMISS_UPDATE) === "1";
-}
-
 export function usePwaUpdate() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [dismissUpdate, setDismissUpdate] = useState(false);
-
-  useEffect(() => {
-    setDismissUpdate(readDismissed());
-  }, []);
+  const [dismissUpdate, dismissUpdateBanner] = useSessionFlag(DISMISS_UPDATE);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -66,11 +58,6 @@ export function usePwaUpdate() {
       registration.waiting?.postMessage({ type: "SKIP_WAITING" });
     });
     setUpdateAvailable(false);
-  }, []);
-
-  const dismissUpdateBanner = useCallback(() => {
-    sessionStorage.setItem(DISMISS_UPDATE, "1");
-    setDismissUpdate(true);
   }, []);
 
   const showUpdateBanner = updateAvailable && !dismissUpdate;

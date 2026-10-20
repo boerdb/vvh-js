@@ -12,7 +12,7 @@ import {
   Medal,
   Globe,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const iconMap = {
@@ -52,28 +52,43 @@ interface SideMenuProps {
 
 export function SideMenu({ open, onClose }: SideMenuProps) {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (!open) return;
+    // Focus naar het menu, en bij sluiten terug naar de menuknop.
+    // Safari focust een knop niet bij klikken; dan terug naar de menuknop zelf.
+    const active = document.activeElement as HTMLElement | null;
+    const opener =
+      active && active !== document.body
+        ? active
+        : document.querySelector<HTMLElement>(".menu-btn, .hero-menu-btn");
+    navRef.current?.querySelector<HTMLElement>("a, button")?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      opener?.focus();
+    };
+  }, [open, onClose]);
 
   const isActive = (url: string) =>
     pathname === url || pathname.startsWith(`${url}/`);
-
-  if (!mounted) return null;
 
   return (
     <>
       <div
         className={`menu-overlay ${open ? "open" : ""}`}
         onClick={onClose}
-        aria-hidden={!open}
+        aria-hidden
       />
       <nav
         className={`side-menu ${open ? "open" : ""}`}
         aria-label="Hoofdmenu"
-        aria-hidden={!open}
+        ref={navRef}
+        inert={!open}
       >
         <p className="side-menu-header">VVH HARLINGEN</p>
         <div className="side-menu-nav">

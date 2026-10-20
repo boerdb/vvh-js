@@ -1,101 +1,89 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Menu } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { InternationalMatchCard } from "@/components/matches/InternationalMatchCard";
+import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
+import { StaleNotice } from "@/components/layout/StaleNotice";
 import { useMenu } from "@/components/layout/AppShell";
+import { getFetchedAt } from "@/lib/api/fetch-api";
 import { getProgramma } from "@/lib/api/nevobo";
 import {
   getNationsLeagueUpcoming,
   type InternationalMatch,
 } from "@/lib/api/thesportsdb";
-import { getLocatieLabel, toDate } from "@/lib/parsers/rss-xml";
+import { getTeamLabel } from "@/lib/constants/teams";
+import { matchesVvhTeam, toDate } from "@/lib/parsers/rss-xml";
 import type { FeedItem } from "@/lib/types/models";
+import { useFeedLoader } from "@/hooks/useFeedLoader";
+import { useMyTeam } from "@/hooks/useMyTeam";
 
-interface HomeMatch extends FeedItem {
-  locatieTekst: "Thuis" | "Uit";
+const HOME_MATCH_COUNT = 3;
+const DAY_MS = 86_400_000;
+
+type HomeView =
+  | { view: "club"; matches: FeedItem[]; team: string | null }
+  | { view: "vnl"; matches: InternationalMatch[] }
+  | { view: "empty" };
+
+/** fetchedAt: leeftijd van het clubprogramma, voor StaleNotice. */
+type HomeData = HomeView & { fetchedAt: Date | null };
+
+function upcomingMatches(items: FeedItem[]): FeedItem[] {
+  const since = Date.now() - DAY_MS;
+  return items
+    .map((item) => ({ item, time: toDate(item.datum)?.getTime() ?? NaN }))
+    .filter(({ time }) => time >= since)
+    .sort((a, b) => a.time - b.time)
+    .map(({ item }) => item);
 }
 
-type HomeView = "club" | "vnl" | "empty";
+async function loadHome(myTeam: string | null): Promise<HomeData> {
+  const programma = await getProgramma();
+  const upcoming = upcomingMatches(programma);
+  const own = myTeam
+    ? upcoming.filter((item) => matchesVvhTeam(item, myTeam))
+    : [];
+
+  let data: HomeView;
+  if (own.length > 0) {
+    data = { view: "club", matches: own.slice(0, HOME_MATCH_COUNT), team: myTeam };
+  } else if (upcoming.length > 0) {
+    data = { view: "club", matches: upcoming.slice(0, HOME_MATCH_COUNT), team: null };
+  } else {
+    // Alleen buiten het seizoen: dan de Nations League als opvulling.
+    const vnl = await getNationsLeagueUpcoming(HOME_MATCH_COUNT).catch(
+      (error: unknown) => {
+        console.error(error);
+        return [];
+      }
+    );
+    data = vnl.length > 0 ? { view: "vnl", matches: vnl } : { view: "empty" };
+  }
+
+  return { ...data, fetchedAt: getFetchedAt(programma) };
+}
+
+function homeTitle(data: HomeData | null): string {
+  if (data?.view === "vnl") return "Internationaal volleybal — Nations League";
+  if (data?.view === "club" && data.team) {
+    return `Komende wedstrijden van ${getTeamLabel(data.team)}`;
+  }
+  return "Komende wedstrijden (thuis en uit)";
+}
 
 export default function HomePage() {
   const { openMenu } = useMenu();
-  const [matches, setMatches] = useState<HomeMatch[]>([]);
-  const [vnlMatches, setVnlMatches] = useState<InternationalMatch[]>([]);
-  const [view, setView] = useState<HomeView>("club");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-
-    async function load() {
-      try {
-        const [programmaResult, vnlResult] = await Promise.allSettled([
-          getProgramma(),
-          getNationsLeagueUpcoming(3),
-        ]);
-
-        if (!active) return;
-
-        const allMatches =
-          programmaResult.status === "fulfilled" ? programmaResult.value : [];
-
-        if (programmaResult.status === "rejected") {
-          console.error(programmaResult.reason);
-        }
-
-        const now = new Date();
-        const sorted = [...allMatches]
-          .map((match) => ({ ...match, datumObj: toDate(match.datum) }))
-          .filter((m) => m.datumObj)
-          .sort(
-            (a, b) => a.datumObj!.getTime() - b.datumObj!.getTime()
-          );
-
-        const upcoming = sorted.filter(
-          (m) => m.datumObj!.getTime() >= now.getTime() - 86400000
-        );
-
-        if (upcoming.length > 0) {
-          setMatches(
-            upcoming.slice(0, 3).map((m) => ({
-              ...m,
-              locatieTekst: getLocatieLabel(m.titel),
-            }))
-          );
-          setVnlMatches([]);
-          setView("club");
-          return;
-        }
-
-        setMatches([]);
-        const vnl =
-          vnlResult.status === "fulfilled" ? vnlResult.value : [];
-        if (vnlResult.status === "rejected") {
-          console.error(vnlResult.reason);
-        }
-        setVnlMatches(vnl);
-        setView(vnl.length > 0 ? "vnl" : "empty");
-      } catch (err) {
-        console.error(err);
-        if (active) {
-          setMatches([]);
-          setVnlMatches([]);
-          setView("empty");
-        }
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      active = false;
-    };
-  }, []);
+  const { myTeam } = useMyTeam();
+  const loader = useCallback(() => loadHome(myTeam), [myTeam]);
+  const { data, loading, error, reload } = useFeedLoader<HomeData | null>(
+    loader,
+    null
+  );
 
   return (
     <div className="home-page">
@@ -127,33 +115,40 @@ export default function HomePage() {
       </section>
 
       <section className="upcoming">
-        <h2>
-          {view === "vnl"
-            ? "Internationaal volleybal — Nations League"
-            : "Komende wedstrijden (thuis en uit)"}
-        </h2>
-        {view === "vnl" && !loading && (
+        <h2>{homeTitle(data)}</h2>
+        {data?.view === "vnl" && !loading && (
           <p className="page-subtitle">
             Geen VVH-wedstrijden gepland; hieronder komende Nations League-wedstrijden.
           </p>
         )}
+        {!myTeam && data?.view === "club" && (
+          <p className="page-subtitle">
+            Tip: tik op de ster naast het teamfilter bij{" "}
+            <Link href="/programma">Programma</Link> om je eigen team hier te
+            zien.
+          </p>
+        )}
+        <StaleNotice fetchedAt={data?.fetchedAt ?? null} />
         {loading ? (
           <PageLoader message="Wedstrijden laden..." />
+        ) : error || !data ? (
+          <ErrorState message="Kon de wedstrijden niet laden." onRetry={reload} />
         ) : (
           <div className="cards-list">
-            {view === "club" &&
-              matches.map((match, i) => (
-                <MatchCard
-                  key={match.link || `${match.titel}-${i}`}
-                  item={match}
-                  locatieLabel={match.locatieTekst}
-                />
+            {data.view === "club" &&
+              data.matches.map((match, i) => (
+                <MatchCard key={match.link || `${match.titel}-${i}`} item={match} />
               ))}
-            {view === "vnl" &&
-              vnlMatches.map((match) => (
+            {data.view === "club" && data.team && (
+              <Link href="/programma?team=ALL" className="home-all-link">
+                Alle clubwedstrijden bekijken
+              </Link>
+            )}
+            {data.view === "vnl" &&
+              data.matches.map((match) => (
                 <InternationalMatchCard key={match.idEvent} match={match} />
               ))}
-            {view === "empty" && (
+            {data.view === "empty" && (
               <p className="empty-state">
                 Geen geplande wedstrijden binnenkort.
               </p>

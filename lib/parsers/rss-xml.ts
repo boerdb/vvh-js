@@ -10,7 +10,7 @@ export function toDate(value: unknown): Date | null {
   return isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function isOwnTeamName(name: string): boolean {
+export function isOwnTeamName(name: string): boolean {
   if (/V\.?V\.?H\.?/i.test(name)) return true;
   return getCombinationTeams().some(
     (team) => team.nevoboName && name.includes(team.nevoboName)

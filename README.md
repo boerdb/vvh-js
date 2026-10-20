@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VVH Harlingen app
 
-## Getting Started
+PWA voor volleybalvereniging VVH Harlingen: programma, thuiswedstrijden in de
+Waddenhal, uitslagen, standen en clubnieuws. Live op **https://vvh.clvs.nl**.
 
-First, run the development server:
+Gebouwd met Next.js 16 (App Router), React 19, Tailwind 4 en Serwist (service worker).
+
+## Ontwikkelen
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # eenmalig
+npm install
+npm run dev                  # http://localhost:3000, service worker staat uit in dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Script | Doel |
+|--------|------|
+| `npm run dev` | Ontwikkelserver |
+| `npm run build` / `npm start` | Productiebuild en -server |
+| `npm test` | Vitest: parsers, agenda-export, teamcodes (`tests/`) |
+| `npm run lint` | ESLint |
+| `npm run icons` | App-icons opnieuw maken uit `assets/vvh-app-icon.svg` |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Maak de lockfile met npm 11 (`npx npm@11 install`); de server draait npm 11 en
+`npm ci` faalt op een lockfile van npm 10.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Hoe het werkt
 
-## Learn More
+- De browser praat alleen met eigen routes onder `/api/…`; die halen Nevobo
+  (RSS en `stand.xlsx`), het WordPress-clubnieuws en TheSportsDB op en cachen
+  60 seconden. Zie [`deploy/API-upstream.md`](deploy/API-upstream.md).
+- `GET /api/agenda?wedstrijd=<id>` geeft één wedstrijd als `.ics`,
+  `GET /api/agenda?team=HS1` een agenda-abonnement (via `webcal://`).
+- De service worker bewaart API-antwoorden tot twee dagen, zodat de app ook
+  zonder bereik het laatst bekende programma toont (met een melding).
+- **Mijn team** (ster naast het teamfilter) staat in `localStorage` en is het
+  standaardfilter op de wedstrijdpagina's en op Home.
 
-To learn more about Next.js, take a look at the following resources:
+## Teams aanpassen
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Alle teams staan in [`lib/constants/teams.ts`](lib/constants/teams.ts).
+Combinatieteams die bij een andere vereniging zijn ingeschreven krijgen een
+`nevoboName` en `verenigingId`; hun feeds worden bij die van VVH gevoegd.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
+Handmatig op de server (PM2, poort 3003, nginx ervoor):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+cd /var/www/vvh-js && git pull && npm ci && npm run build && pm2 restart vvh-js
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Nginx-config: [`deploy/nginx-vvh.clvs.nl.conf`](deploy/nginx-vvh.clvs.nl.conf).

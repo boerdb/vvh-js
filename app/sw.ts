@@ -21,14 +21,15 @@ const serwist = new Serwist({
       matcher: ({ sameOrigin, url: { pathname } }) =>
         sameOrigin && pathname.startsWith("/api/"),
       method: "GET",
+      // Netwerk eerst; na 6 s of offline de laatst opgeslagen versie (tot 2 dagen oud),
+      // zodat de app in een sporthal zonder bereik toch het programma toont.
       handler: new NetworkFirst({
         cacheName: "apis",
-        networkTimeoutSeconds: 25,
+        networkTimeoutSeconds: 6,
         plugins: [
           new ExpirationPlugin({
-            maxEntries: 32,
-            maxAgeSeconds: 60,
-            maxAgeFrom: "last-used",
+            maxEntries: 64,
+            maxAgeSeconds: 2 * 24 * 60 * 60,
           }),
         ],
       }),

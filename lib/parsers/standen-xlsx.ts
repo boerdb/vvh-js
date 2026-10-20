@@ -1,6 +1,10 @@
 import * as XLSX from "xlsx";
 import { getNevoboTeamName } from "@/lib/constants/teams";
-import type { StandenResult, StandingEntry } from "@/lib/types/models";
+import type {
+  StandenResult,
+  StandingEntry,
+  StandingRow,
+} from "@/lib/types/models";
 
 function clubPrefixFromSearch(searchString: string): string {
   return searchString.replace(/\s+[A-Z0-9]+ \d+\s*$/i, "").trim() || "V.V.H.";
@@ -46,10 +50,8 @@ export function parseStandenFromBuffer(
   const searchString = getNevoboTeamName(teamCode);
   const clubPrefix = clubPrefixFromSearch(searchString);
 
-  let isCorrectTeam = false;
-  const standenLijst: StandingEntry[] = [];
-  let tabelTeller = 1;
-  let gevondenPoule = "";
+  const tables: StandTable[] = [];
+  let current: StandTable | null = null;
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
@@ -61,51 +63,52 @@ export function parseStandenFromBuffer(
       firstCell.startsWith(`"${searchString}`);
 
     if (isTeamTitleRow) {
-      if (!gevondenPoule) {
-        gevondenPoule = extractPouleFromTitleRow(row, searchString);
-      }
-
-      if (standenLijst.length > 0) {
-        tabelTeller++;
-        standenLijst.push({
-          isDivider: true,
-          titel:
-            tabelTeller === 2
-              ? "Beker competitie"
-              : `Extra Poule ${tabelTeller}`,
-        });
-      }
-
-      isCorrectTeam = true;
+      current = { poule: extractPouleFromTitleRow(row, searchString), rows: [] };
+      tables.push(current);
       continue;
     }
 
-    if (isCorrectTeam) {
-      if (
-        firstCell.startsWith(clubPrefix) &&
-        !firstCell.startsWith(searchString)
-      )
-        break;
+    if (!current) continue;
 
-      if (firstCell === "" || firstCell === "undefined") {
-        isCorrectTeam = false;
-        continue;
-      }
+    // Titel van een ander clubteam of lege regel: einde van deze tabel.
+    if (firstCell.startsWith(clubPrefix) || firstCell === "" || firstCell === "undefined") {
+      current = null;
+      continue;
+    }
 
-      if (firstCell === "Ranking") continue;
+    if (firstCell === "Ranking") continue;
 
-      if (row.length >= 6 && /^\d+$/.test(firstCell)) {
-        standenLijst.push({
-          rank: String(row[0] ?? ""),
-          team: String(row[1]).replace(/"/g, "").trim(),
-          wedstrijden: String(row[2] ?? ""),
-          punten: String(row[3] ?? ""),
-          sets: `${row[4]}-${row[5]}`,
-          isVVH: String(row[1]).includes(searchString),
-        });
-      }
+    if (row.length >= 6 && /^\d+$/.test(firstCell)) {
+      current.rows.push({
+        rank: String(row[0] ?? ""),
+        team: String(row[1]).replace(/"/g, "").trim(),
+        wedstrijden: String(row[2] ?? ""),
+        punten: String(row[3] ?? ""),
+        sets: `${row[4]}-${row[5]}`,
+        isVVH: String(row[1]).includes(searchString),
+      });
     }
   }
 
-  return { standen: standenLijst, poule: gevondenPoule };
+  // Reguliere competitie eerst; Nevobo zet de beker soms bovenaan.
+  const ordered = tables
+    .filter((table) => table.rows.length > 0)
+    .sort((a, b) => Number(isBeker(a.poule)) - Number(isBeker(b.poule)));
+
+  const standen: StandingEntry[] = ordered.flatMap((table, index) =>
+    ordered.length > 1
+      ? [{ isDivider: true as const, titel: table.poule || `Poule ${index + 1}` }, ...table.rows]
+      : table.rows
+  );
+
+  return { standen, poule: ordered[0]?.poule ?? "" };
+}
+
+interface StandTable {
+  poule: string;
+  rows: StandingRow[];
+}
+
+function isBeker(poule: string): boolean {
+  return /beker/i.test(poule);
 }

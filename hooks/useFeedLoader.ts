@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getFetchedAt } from "@/lib/api/fetch-api";
 
 /** focus en visibilitychange vuren vaak tegelijk; upstream cachet toch 60 s. */
 const MIN_REFRESH_INTERVAL_MS = 30_000;
@@ -9,6 +10,7 @@ export function useFeedLoader<T>(loader: () => Promise<T>, initial: T) {
   const [data, setData] = useState<T>(initial);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [fetchedAt, setFetchedAt] = useState<Date | null>(null);
   const initialRef = useRef(initial);
   const requestIdRef = useRef(0);
   const lastRunRef = useRef(0);
@@ -20,6 +22,7 @@ export function useFeedLoader<T>(loader: () => Promise<T>, initial: T) {
       if (showLoader) {
         // Nooit data van een vorige loader (bijv. ander team) laten staan.
         setData(initialRef.current);
+        setFetchedAt(null);
         setError(null);
         setLoading(true);
       }
@@ -27,6 +30,7 @@ export function useFeedLoader<T>(loader: () => Promise<T>, initial: T) {
         const result = await loader();
         if (requestId !== requestIdRef.current) return;
         setData(result);
+        setFetchedAt(getFetchedAt(result));
         setError(null);
       } catch (err) {
         if (requestId !== requestIdRef.current) return;
@@ -63,5 +67,5 @@ export function useFeedLoader<T>(loader: () => Promise<T>, initial: T) {
 
   const reload = useCallback(() => run(true), [run]);
 
-  return { data, loading, error, reload };
+  return { data, loading, error, reload, fetchedAt };
 }

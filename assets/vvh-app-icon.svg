@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Bron voor alle app-icons (npm run icons). Alles binnen de maskable safe zone (r = 205). -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a4a9c"/>
+      <stop offset="1" stop-color="#0b2257"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c9971f"/>
+      <stop offset="0.5" stop-color="#f6d36b"/>
+      <stop offset="1" stop-color="#c9971f"/>
+    </linearGradient>
+    <clipPath id="ball">
+      <circle cx="256" cy="122" r="50"/>
+    </clipPath>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Vlucht van de bal -->
+  <g fill="none" stroke="url(#gold)" stroke-linecap="round">
+    <path d="M150 150 Q178 118 196 112" stroke-width="7" opacity="0.55"/>
+    <path d="M140 176 Q174 142 200 134" stroke-width="7" opacity="0.35"/>
+  </g>
+
+  <!-- Volleybal -->
+  <circle cx="256" cy="122" r="54" fill="url(#gold)"/>
+  <circle cx="256" cy="122" r="50" fill="#ffffff"/>
+  <g clip-path="url(#ball)" fill="none" stroke="#0b2257" stroke-width="6" stroke-linecap="round">
+    <path d="M256 122 Q 228 100 236 74"/>
+    <path d="M256 122 Q 290 116 302 140"/>
+    <path d="M256 122 Q 250 154 222 158"/>
+    <path d="M212 98 Q 226 128 214 150"/>
+    <path d="M276 76 Q 266 104 290 118"/>
+    <path d="M296 156 Q 270 146 248 168"/>
+  </g>
+
+  <!-- VVH in blokletters, zoals het clublogo -->
+  <g fill="#ffffff">
+    <polygon points="81,196 123,196 137,302 151,196 193,196 157,360 117,360"/>
+    <polygon points="200,196 242,196 256,302 270,196 312,196 276,360 236,360"/>
+    <path d="M319 196 H357 V258 H393 V196 H431 V360 H393 V294 H357 V360 H319 Z"/>
+  </g>
+
+  <!-- Gouden lijn + plaatsnaam -->
+  <rect x="81" y="376" width="350" height="7" rx="3.5" fill="url(#gold)"/>
+  <text x="256" y="420" text-anchor="middle" fill="#f6d36b"
+        font-family="Arial, Helvetica, sans-serif" font-weight="700"
+        font-size="30" letter-spacing="9">HARLINGEN</text>
+</svg>

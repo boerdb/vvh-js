@@ -4,10 +4,9 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useLayoutEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from "react";
 
 type ThemeSetting = "light" | "dark" | "system";
@@ -19,63 +18,69 @@ interface ThemeContextValue {
 }
 
 const STORAGE_KEY = "theme";
+const CHANGE_EVENT = "vvh-theme-change";
+const DARK_QUERY = "(prefers-color-scheme: dark)";
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function getSystemTheme(): "light" | "dark" {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+/** Keuze van deze sessie als localStorage niet werkt (privémodus). */
+let memorySetting: ThemeSetting | null = null;
+
+function readSetting(): ThemeSetting {
+  if (memorySetting) return memorySetting;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored === "light" || stored === "dark" || stored === "system"
+      ? stored
+      : "system";
+  } catch {
+    return memorySetting ?? "system";
+  }
 }
 
-function resolveTheme(setting: ThemeSetting): "light" | "dark" {
-  return setting === "system" ? getSystemTheme() : setting;
+function subscribeSetting(onChange: () => void) {
+  window.addEventListener(CHANGE_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
 }
 
-function applyTheme(resolved: "light" | "dark") {
-  document.documentElement.classList.toggle("dark", resolved === "dark");
+function subscribeSystem(onChange: () => void) {
+  const mq = window.matchMedia(DARK_QUERY);
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
 }
+
+function readSystemDark(): boolean {
+  return window.matchMedia(DARK_QUERY).matches;
+}
+
+const subscribeNever = () => () => {};
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeSetting>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  // Server en hydration: "system" + licht, net als voorheen; daarna de echte waarden.
+  const theme = useSyncExternalStore(subscribeSetting, readSetting, () => "system" as const);
+  const systemDark = useSyncExternalStore(subscribeSystem, readSystemDark, () => false);
+  const hydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
+  const resolvedTheme: "light" | "dark" =
+    theme === "system" ? (systemDark ? "dark" : "light") : theme;
 
   useLayoutEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as ThemeSetting | null;
-    const initial: ThemeSetting =
-      stored === "light" || stored === "dark" || stored === "system"
-        ? stored
-        : "system";
-    const resolved = resolveTheme(initial);
-    setThemeState(initial);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
-  }, []);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onSystemChange = () => {
-      const current = localStorage.getItem(STORAGE_KEY) as ThemeSetting | null;
-      const setting: ThemeSetting =
-        current === "light" || current === "dark" || current === "system"
-          ? current
-          : "system";
-      if (setting !== "system") return;
-      const next = getSystemTheme();
-      setResolvedTheme(next);
-      applyTheme(next);
-    };
-
-    mq.addEventListener("change", onSystemChange);
-    return () => mq.removeEventListener("change", onSystemChange);
-  }, []);
+    // Tijdens hydration klopt resolvedTheme nog niet; het init-script in layout.tsx heeft de klasse al gezet.
+    if (!hydrated) return;
+    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
+  }, [hydrated, resolvedTheme]);
 
   const setTheme = useCallback((next: "light" | "dark" | "system") => {
-    localStorage.setItem(STORAGE_KEY, next);
-    setThemeState(next);
-    const resolved = resolveTheme(next);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // Geen opslag: thema geldt dan alleen voor deze sessie.
+      memorySetting = next;
+    }
+    window.dispatchEvent(new Event(CHANGE_EVENT));
   }, []);
 
   const value = useMemo(

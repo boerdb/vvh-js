@@ -59,9 +59,11 @@ export function StandingsTable({
             </tr>
           </thead>
           <tbody>
-            {hasStandRows && (
-              <tr className="poule-divider-row poule-main-row">
-                <td colSpan={5}>Reguliere competitie</td>
+            {!hasStandRows && (
+              <tr>
+                <td colSpan={5} className="empty-state">
+                  Nog geen stand beschikbaar.
+                </td>
               </tr>
             )}
             {rows.map((row, index) =>

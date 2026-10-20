@@ -1,9 +1,10 @@
 "use client";
 
 import { Suspense, useCallback, useMemo } from "react";
-import { MatchCard } from "@/components/matches/MatchCard";
+import { MatchList } from "@/components/matches/MatchList";
 import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
+import { StaleNotice } from "@/components/layout/StaleNotice";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import { getResultaten } from "@/lib/api/nevobo";
 import { getTeamLabel, VVH_WEDSTRIJD_TEAMS } from "@/lib/constants/teams";
@@ -14,7 +15,8 @@ import { ALL_TEAMS, useTeamFilter } from "@/hooks/useTeamFilter";
 
 function UitslagenContent() {
   const loader = useCallback(() => getResultaten(), []);
-  const { data: items, loading, error, reload } = useFeedLoader<FeedItem[]>(loader, []);
+  const { data: items, loading, error, reload, fetchedAt } =
+    useFeedLoader<FeedItem[]>(loader, []);
   const { teamFilter, setTeamFilter } = useTeamFilter({
     teams: VVH_WEDSTRIJD_TEAMS,
   });
@@ -42,23 +44,20 @@ function UitslagenContent() {
           teams={VVH_WEDSTRIJD_TEAMS}
         />
       </div>
+      <StaleNotice fetchedAt={fetchedAt} />
       {loading ? (
         <PageLoader message="Uitslagen laden..." />
       ) : error ? (
         <ErrorState message="Kon de uitslagen niet laden." onRetry={reload} />
       ) : (
-        <div className="cards-list">
-          {filtered.map((item, i) => (
-            <MatchCard key={item.link || `${item.titel}-${i}`} item={item} />
-          ))}
-          {filtered.length === 0 && (
-            <p className="empty-state">
-              {teamFilter === ALL_TEAMS
-                ? "Geen uitslagen gevonden."
-                : "Geen uitslagen gevonden voor dit team."}
-            </p>
-          )}
-        </div>
+        <MatchList
+          items={filtered}
+          emptyText={
+            teamFilter === ALL_TEAMS
+              ? "Geen uitslagen gevonden."
+              : "Geen uitslagen gevonden voor dit team."
+          }
+        />
       )}
     </div>
   );

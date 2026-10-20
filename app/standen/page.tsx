@@ -3,6 +3,7 @@
 import { Suspense, useCallback } from "react";
 import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
+import { StaleNotice } from "@/components/layout/StaleNotice";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import { StandingsTable } from "@/components/standings/StandingsTable";
 import { getStanden } from "@/lib/api/team";
@@ -14,7 +15,7 @@ import { useTeamFilter } from "@/hooks/useTeamFilter";
 function StandenContent() {
   const { teamFilter, setTeamFilter } = useTeamFilter({ allowAll: false });
   const loader = useCallback(() => getStanden(teamFilter), [teamFilter]);
-  const { data: result, loading, error, reload } = useFeedLoader<StandenResult | null>(
+  const { data: result, loading, error, reload, fetchedAt } = useFeedLoader<StandenResult | null>(
     loader,
     null
   );
@@ -32,6 +33,7 @@ function StandenContent() {
           includeAll={false}
         />
       </div>
+      <StaleNotice fetchedAt={fetchedAt} />
       {loading ? (
         <PageLoader message="Standen laden..." />
       ) : error || !result ? (

@@ -31,11 +31,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isHome = pathname === "/home" || pathname === "/";
 
   const openMenu = useCallback(() => setMenuOpen(true), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
   const menuValue = useMemo(() => ({ openMenu }), [openMenu]);
 
   return (
     <MenuContext.Provider value={menuValue}>
-      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <SideMenu open={menuOpen} onClose={closeMenu} />
       <div className="app-shell">
         {!isHome && (
           <header className="app-header">

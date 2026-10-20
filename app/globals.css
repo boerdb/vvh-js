@@ -207,6 +207,90 @@ body {
   cursor: pointer;
 }
 
+.team-filter-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.team-filter-row .team-filter-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.my-team-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.3rem;
+  flex-shrink: 0;
+  border: 1px solid var(--shell-border);
+  border-radius: 0.5rem;
+  background: var(--shell-page-bg);
+  color: var(--shell-text-muted);
+  cursor: pointer;
+}
+
+.my-team-btn.active {
+  color: #ffb300;
+  border-color: #ffb300;
+}
+
+.my-team-btn:focus-visible {
+  outline: 2px solid #1976d2;
+  outline-offset: 1px;
+}
+
+/* Wedstrijden per dag */
+.day-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.day-heading {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--shell-text-muted);
+  margin: 0 0 0.5rem;
+}
+
+.agenda-subscribe,
+.home-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #1976d2;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 1rem;
+}
+
+.agenda-subscribe:hover,
+.home-all-link:hover {
+  text-decoration: underline;
+}
+
+.home-all-link {
+  justify-content: center;
+  margin: 0.25rem 0 0;
+}
+
+.stale-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #8a5a00;
+  background: #fff4d6;
+  border: 1px solid #ffd27a;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0 1rem;
+}
+
 .team-filter-select:focus {
   outline: 2px solid #1976d2;
   outline-offset: 1px;

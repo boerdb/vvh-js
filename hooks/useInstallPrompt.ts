@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useSessionFlag } from "@/hooks/useSessionFlag";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,23 +11,20 @@ interface BeforeInstallPromptEvent extends Event {
 const DISMISS_ANDROID = "vvh-dismiss-android-install";
 const DISMISS_IOS = "vvh-dismiss-ios-install";
 
-function readDismissed(key: string): boolean {
-  if (typeof window === "undefined") return false;
-  return sessionStorage.getItem(key) === "1";
-}
+const subscribeNever = () => () => {};
 
 export function useInstallPrompt() {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [showIosHint, setShowIosHint] = useState(false);
-  const [dismissAndroid, setDismissAndroid] = useState(false);
-  const [dismissIos, setDismissIos] = useState(false);
-
-  useEffect(() => {
-    setShowIosHint(shouldShowIosInstallHint());
-    setDismissAndroid(readDismissed(DISMISS_ANDROID));
-    setDismissIos(readDismissed(DISMISS_IOS));
-  }, []);
+  // Op de server en tijdens hydration false; daarna de echte browserwaarde.
+  const isIosBrowser = useSyncExternalStore(
+    subscribeNever,
+    shouldShowIosInstallHint,
+    () => false
+  );
+  const [installed, setInstalled] = useState(false);
+  const [dismissAndroid, dismissAndroidBanner] = useSessionFlag(DISMISS_ANDROID);
+  const [dismissIos, dismissIosBanner] = useSessionFlag(DISMISS_IOS);
 
   useEffect(() => {
     const onBeforeInstall = (e: Event) => {
@@ -36,7 +34,7 @@ export function useInstallPrompt() {
 
     const onInstalled = () => {
       setInstallPrompt(null);
-      setShowIosHint(false);
+      setInstalled(true);
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
@@ -53,19 +51,9 @@ export function useInstallPrompt() {
     setInstallPrompt(null);
   }, [installPrompt]);
 
-  const dismissAndroidBanner = useCallback(() => {
-    sessionStorage.setItem(DISMISS_ANDROID, "1");
-    setDismissAndroid(true);
-  }, []);
-
-  const dismissIosBanner = useCallback(() => {
-    sessionStorage.setItem(DISMISS_IOS, "1");
-    setDismissIos(true);
-  }, []);
-
   const showAndroidInstallBanner = !!installPrompt && !dismissAndroid;
   const showIosInstallBanner =
-    showIosHint && !installPrompt && !dismissIos;
+    isIosBrowser && !installed && !installPrompt && !dismissIos;
 
   return {
     showAndroidInstallBanner,
@@ -77,7 +65,6 @@ export function useInstallPrompt() {
 }
 
 function shouldShowIosInstallHint(): boolean {
-  if (typeof window === "undefined") return false;
   const nav = window.navigator;
   const ua = nav.userAgent.toLowerCase();
   const isIOS =

@@ -1,7 +1,6 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTheme } from "./ThemeProvider";
 
 interface ThemeToggleProps {
@@ -9,24 +8,9 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ onClose }: ThemeToggleProps) {
+  // ThemeProvider levert tijdens hydration dezelfde waarde als de server,
+  // dus hier is geen "mounted"-omweg meer nodig.
   const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <button type="button" className="menu-item" aria-label="Thema wisselen">
-        <span aria-hidden="true">
-          <Moon size={20} />
-        </span>
-        <span>Thema</span>
-      </button>
-    );
-  }
-
   const isDark = resolvedTheme === "dark";
 
   return (
