@@ -1,4 +1,4 @@
-import { getTeamOption } from "@/lib/constants/teams";
+import { getTeamOption, parseTeamCode } from "@/lib/constants/teams";
 
 /** VVH-verenigingscode bij Nevobo (zelfde als in de oude proxy.php). */
 export const NEVOBO_VERENIGING_ID =
@@ -11,18 +11,20 @@ const TEAM_SEGMENTS: Record<string, string> = {
   MA: "meiden-a",
   MB: "meiden-b",
   MC: "meiden-c",
+  L4: "l4",
 };
 
 export function teamNevoboPath(teamCode: string): string {
-  const match = teamCode.toUpperCase().match(/^([A-Z]+)(\d+)$/);
-  if (!match) {
+  // parseTeamCode kent L4 als prefix (L41 = L4 + 1, niet L + 41).
+  const parsed = parseTeamCode(teamCode);
+  if (!parsed) {
     throw new Error(`Ongeldige teamcode: ${teamCode}`);
   }
-  const segment = TEAM_SEGMENTS[match[1]];
+  const segment = TEAM_SEGMENTS[parsed.prefix];
   if (!segment) {
-    throw new Error(`Onbekend teamprefix: ${match[1]}`);
+    throw new Error(`Onbekend teamprefix: ${parsed.prefix}`);
   }
-  return `${segment}/${match[2]}`;
+  return `${segment}/${parsed.number}`;
 }
 
 export function teamVerenigingId(teamCode: string): string {

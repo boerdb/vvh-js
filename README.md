@@ -36,6 +36,17 @@ Maak de lockfile met npm 11 (`npx npm@11 install`); de server draait npm 11 en
 - **Mijn team** (ster naast het teamfilter) staat in `localStorage` en is het
   standaardfilter op de wedstrijdpagina's en op Home.
 
+## Pushmeldingen
+
+- Leden zetten meldingen aan op Home (alleen met een Mijn team). Op iPhone/iPad
+  werkt dat alleen als de app op het beginscherm staat.
+- `instrumentation.ts` start bij het opstarten van de server een controle die
+  elke 10 minuten programma en uitslagen vergelijkt met de vorige keer
+  (`lib/push/changes.ts`) en meldt: nieuwe uitslag, andere aanvangstijd, vervallen.
+- Abonnementen en de laatste stand staan in `data/push.json` (niet in git).
+- Uit tenzij `VAPID_PUBLIC_KEY` en `VAPID_PRIVATE_KEY` gezet zijn (zie
+  `.env.example`; sleutels maken met `npx web-push generate-vapid-keys`).
+
 ## Teams aanpassen
 
 Alle teams staan in [`lib/constants/teams.ts`](lib/constants/teams.ts).
@@ -44,7 +55,7 @@ Combinatieteams die bij een andere vereniging zijn ingeschreven krijgen een
 
 ## Deploy
 
-Handmatig op de server (PM2, poort 3003, nginx ervoor):
+Handmatig op de server (PM2, poort 3004, nginx ervoor):
 
 ```bash
 cd /var/www/vvh-js && git pull && npm ci && npm run build && pm2 restart vvh-js

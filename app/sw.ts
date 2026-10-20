@@ -44,4 +44,46 @@ self.addEventListener("message", (event) => {
   }
 });
 
+// Pushmeldingen (zie lib/push): payload { title, body, url, tag }.
+self.addEventListener("push", (event) => {
+  const data = (() => {
+    try {
+      return event.data?.json() ?? {};
+    } catch {
+      return { body: event.data?.text() };
+    }
+  })() as { title?: string; body?: string; url?: string; tag?: string };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || "VVH Harlingen", {
+      body: data.body,
+      tag: data.tag,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: data.url || "/home" },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(
+    (event.notification.data as { url?: string } | undefined)?.url || "/home",
+    self.location.origin
+  ).href;
+  event.waitUntil(
+    (async () => {
+      // Open venster hergebruiken als de app al draait.
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const existing = windows.find((w) => new URL(w.url).origin === self.location.origin);
+      if (existing) {
+        await existing.focus();
+        await existing.navigate(url);
+        return;
+      }
+      await self.clients.openWindow(url);
+    })()
+  );
+});
+
 serwist.addEventListeners();

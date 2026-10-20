@@ -42,3 +42,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Pushmeldingen: abonnementen en laatste stand (lib/push/store.ts)
+/data/
+/data-local/

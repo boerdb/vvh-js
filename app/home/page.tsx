@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { useCallback } from "react";
+import { HomeHighlights } from "@/components/home/HomeHighlights";
+import { PushToggle } from "@/components/home/PushToggle";
 import { MatchCard } from "@/components/matches/MatchCard";
 import { InternationalMatchCard } from "@/components/matches/InternationalMatchCard";
 import { ErrorState } from "@/components/layout/ErrorState";
@@ -11,31 +13,42 @@ import { PageLoader } from "@/components/layout/PageLoader";
 import { StaleNotice } from "@/components/layout/StaleNotice";
 import { useMenu } from "@/components/layout/AppShell";
 import { getFetchedAt } from "@/lib/api/fetch-api";
-import { getProgramma } from "@/lib/api/nevobo";
+import { getProgramma, getResultaten } from "@/lib/api/nevobo";
 import {
   getNationsLeagueUpcoming,
   type InternationalMatch,
 } from "@/lib/api/thesportsdb";
 import { getTeamLabel } from "@/lib/constants/teams";
+import { parseMatch } from "@/lib/parsers/match";
 import { matchesVvhTeam, toDate } from "@/lib/parsers/rss-xml";
 import type { FeedItem } from "@/lib/types/models";
 import { useFeedLoader } from "@/hooks/useFeedLoader";
 import { useMyTeam } from "@/hooks/useMyTeam";
 
 const HOME_MATCH_COUNT = 3;
-const DAY_MS = 86_400_000;
+/** Een wedstrijd die net begonnen is telt nog even als "komend". */
+const IN_PROGRESS_MS = 3 * 60 * 60 * 1000;
 
-type HomeView =
-  | { view: "club"; matches: FeedItem[]; team: string | null }
-  | { view: "vnl"; matches: InternationalMatch[] }
-  | { view: "empty" };
-
-/** fetchedAt: leeftijd van het clubprogramma, voor StaleNotice. */
-type HomeData = HomeView & { fetchedAt: Date | null };
+interface HomeData {
+  /** null = hele club (geen Mijn team, of daar staat niets voor). */
+  team: string | null;
+  next: FeedItem | null;
+  lastResult: FeedItem | null;
+  /** Wedstrijden na "next". */
+  later: FeedItem[];
+  /** Alleen buiten het seizoen, als de club niets gepland heeft. */
+  vnl: InternationalMatch[];
+  /** Leeftijd van het clubprogramma, voor StaleNotice. */
+  fetchedAt: Date | null;
+}
 
 function upcomingMatches(items: FeedItem[]): FeedItem[] {
-  const since = Date.now() - DAY_MS;
+  const since = Date.now() - IN_PROGRESS_MS;
   return items
+    .filter((item) => {
+      const match = parseMatch(item);
+      return !match?.uitslag && !match?.vervallen;
+    })
     .map((item) => ({ item, time: toDate(item.datum)?.getTime() ?? NaN }))
     .filter(({ time }) => time >= since)
     .sort((a, b) => a.time - b.time)
@@ -43,37 +56,39 @@ function upcomingMatches(items: FeedItem[]): FeedItem[] {
 }
 
 async function loadHome(myTeam: string | null): Promise<HomeData> {
-  const programma = await getProgramma();
+  // Uitslagen zijn een extraatje: als die feed faalt, toont Home toch het programma.
+  const [programma, resultaten] = await Promise.all([
+    getProgramma(),
+    getResultaten().catch((error: unknown) => {
+      console.error(error);
+      return [] as FeedItem[];
+    }),
+  ]);
   const upcoming = upcomingMatches(programma);
-  const own = myTeam
-    ? upcoming.filter((item) => matchesVvhTeam(item, myTeam))
-    : [];
+  const results = resultaten.filter((item) => parseMatch(item)?.uitslag);
 
-  let data: HomeView;
-  if (own.length > 0) {
-    data = { view: "club", matches: own.slice(0, HOME_MATCH_COUNT), team: myTeam };
-  } else if (upcoming.length > 0) {
-    data = { view: "club", matches: upcoming.slice(0, HOME_MATCH_COUNT), team: null };
-  } else {
-    // Alleen buiten het seizoen: dan de Nations League als opvulling.
-    const vnl = await getNationsLeagueUpcoming(HOME_MATCH_COUNT).catch(
-      (error: unknown) => {
-        console.error(error);
-        return [];
-      }
-    );
-    data = vnl.length > 0 ? { view: "vnl", matches: vnl } : { view: "empty" };
-  }
+  const ownUpcoming = myTeam ? upcoming.filter((i) => matchesVvhTeam(i, myTeam)) : [];
+  const ownResults = myTeam ? results.filter((i) => matchesVvhTeam(i, myTeam)) : [];
+  const useTeam = Boolean(myTeam) && (ownUpcoming.length > 0 || ownResults.length > 0);
+  const scopeUpcoming = useTeam ? ownUpcoming : upcoming;
+  const scopeResults = useTeam ? ownResults : results;
 
-  return { ...data, fetchedAt: getFetchedAt(programma) };
-}
+  const vnl =
+    upcoming.length > 0
+      ? []
+      : await getNationsLeagueUpcoming(HOME_MATCH_COUNT).catch((error: unknown) => {
+          console.error(error);
+          return [];
+        });
 
-function homeTitle(data: HomeData | null): string {
-  if (data?.view === "vnl") return "Internationaal volleybal — Nations League";
-  if (data?.view === "club" && data.team) {
-    return `Komende wedstrijden van ${getTeamLabel(data.team)}`;
-  }
-  return "Komende wedstrijden (thuis en uit)";
+  return {
+    team: useTeam ? myTeam : null,
+    next: scopeUpcoming[0] ?? null,
+    lastResult: scopeResults[0] ?? null,
+    later: scopeUpcoming.slice(1, 1 + HOME_MATCH_COUNT),
+    vnl,
+    fetchedAt: getFetchedAt(programma),
+  };
 }
 
 export default function HomePage() {
@@ -115,45 +130,55 @@ export default function HomePage() {
       </section>
 
       <section className="upcoming">
-        <h2>{homeTitle(data)}</h2>
-        {data?.view === "vnl" && !loading && (
-          <p className="page-subtitle">
-            Geen VVH-wedstrijden gepland; hieronder komende Nations League-wedstrijden.
-          </p>
-        )}
-        {!myTeam && data?.view === "club" && (
+        <h2>{data?.team ? `Mijn team: ${getTeamLabel(data.team)}` : "VVH Harlingen"}</h2>
+        {!myTeam && data && !loading && (
           <p className="page-subtitle">
             Tip: tik op de ster naast het teamfilter bij{" "}
-            <Link href="/programma">Programma</Link> om je eigen team hier te
+            <Link href="/programma">Programma</Link> om hier je eigen team te
             zien.
           </p>
         )}
         <StaleNotice fetchedAt={data?.fetchedAt ?? null} />
         {loading ? (
-          <PageLoader message="Wedstrijden laden..." />
+          <PageLoader message="Wedstrijden laden..." count={2} />
         ) : error || !data ? (
           <ErrorState message="Kon de wedstrijden niet laden." onRetry={reload} />
         ) : (
-          <div className="cards-list">
-            {data.view === "club" &&
-              data.matches.map((match, i) => (
-                <MatchCard key={match.link || `${match.titel}-${i}`} item={match} />
-              ))}
-            {data.view === "club" && data.team && (
+          <>
+            <HomeHighlights next={data.next} lastResult={data.lastResult} team={data.team} />
+            {myTeam && <PushToggle team={myTeam} />}
+            {data.later.length > 0 && (
+              <>
+                <h3 className="home-section-title">Daarna</h3>
+                <div className="cards-list">
+                  {data.later.map((match, i) => (
+                    <MatchCard key={match.link || `${match.titel}-${i}`} item={match} />
+                  ))}
+                </div>
+              </>
+            )}
+            {data.team && (
               <Link href="/programma?team=ALL" className="home-all-link">
                 Alle clubwedstrijden bekijken
               </Link>
             )}
-            {data.view === "vnl" &&
-              data.matches.map((match) => (
-                <InternationalMatchCard key={match.idEvent} match={match} />
-              ))}
-            {data.view === "empty" && (
-              <p className="empty-state">
-                Geen geplande wedstrijden binnenkort.
-              </p>
+            {data.vnl.length > 0 && (
+              <>
+                <h3 className="home-section-title">Internationaal — Nations League</h3>
+                <p className="page-subtitle">
+                  Geen VVH-wedstrijden gepland; dit zijn de komende Nations League-wedstrijden.
+                </p>
+                <div className="cards-list">
+                  {data.vnl.map((match) => (
+                    <InternationalMatchCard key={match.idEvent} match={match} />
+                  ))}
+                </div>
+              </>
             )}
-          </div>
+            {!data.next && !data.lastResult && data.vnl.length === 0 && (
+              <p className="empty-state">Geen geplande wedstrijden binnenkort.</p>
+            )}
+          </>
         )}
       </section>
     </div>

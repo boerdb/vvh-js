@@ -5,16 +5,10 @@ const { version } = packageJson;
 
 /** Alleen de wijzigingen van de huidige versie; bij een nieuwe release vervangen. */
 const RELEASE_NOTES = [
-  "Mijn team: tik op de ster naast het teamfilter en je ziet overal eerst je eigen team, ook op Home.",
-  "Wedstrijden in je agenda zetten, of abonneren op de agenda van je team.",
-  "Uitslagen per speeldag, met de score groot, gewonnen of verloren en de setstanden.",
-  "Speellocatie, thuis/uit en afgelaste wedstrijden direct zichtbaar op elke wedstrijd.",
-  "Standen tonen de echte poulenaam, met de competitie boven de beker.",
-  "Werkt ook zonder bereik: je ziet dan de laatst opgehaalde gegevens.",
-  "Duidelijke melding met 'Opnieuw proberen' als gegevens niet laden.",
-  "Tabbalk onderin: Home, Programma, Uitslagen en Standen met één tik.",
-  "Wedstrijdkaarten en standen passen zich aan de donkere modus aan, met beter leesbare datums.",
-  "Nieuwe app-icon en een opstartscherm op iPhone en iPad.",
+  "Home toont in één oogopslag de volgende wedstrijd en de laatste uitslag van je team.",
+  "Meldingen voor je team: bij een uitslag, een nieuwe aanvangstijd of een afgelaste wedstrijd. Zet ze aan op Home.",
+  "Je eigen team staat vetgedrukt in elke wedstrijd.",
+  "Rustigere laadschermen die al de vorm van de kaarten hebben.",
 ];
 
 export default function InfoPage() {

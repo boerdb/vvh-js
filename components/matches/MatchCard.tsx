@@ -3,7 +3,7 @@ import { nl } from "date-fns/locale";
 import { CalendarPlus, MapPin } from "lucide-react";
 import { sanitizeHtml } from "@/lib/utils/sanitize";
 import { parseMatch, type ParsedMatch } from "@/lib/parsers/match";
-import { toDate } from "@/lib/parsers/rss-xml";
+import { isOwnTeamName, toDate } from "@/lib/parsers/rss-xml";
 import type { FeedItem } from "@/lib/types/models";
 
 interface MatchCardProps {
@@ -11,6 +11,15 @@ interface MatchCardProps {
   locatieLabel?: "Thuis" | "Uit";
   /** In een lijst per dag staat de datum al in de kop. */
   timeOnly?: boolean;
+}
+
+/** Eigen team vet, tegenstander normaal: in één oogopslag zien wie VVH is. */
+function TeamName({ name }: { name: string }) {
+  return isOwnTeamName(name) ? (
+    <strong className="own-team">{name}</strong>
+  ) : (
+    <span className="other-team">{name}</span>
+  );
 }
 
 function MatchResult({ match }: { match: ParsedMatch }) {
@@ -55,7 +64,13 @@ export function MatchCard({ item, locatieLabel, timeOnly = false }: MatchCardPro
     <article className="match-card">
       <div className="match-card-header">
         <h3 className="match-card-title">
-          {match ? `${match.thuis} - ${match.uit}` : item.titel}
+          {match ? (
+            <>
+              <TeamName name={match.thuis} /> - <TeamName name={match.uit} />
+            </>
+          ) : (
+            item.titel
+          )}
         </h3>
         {(dateStr || label) && (
           <p className="match-card-subtitle">

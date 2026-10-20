@@ -384,3 +384,220 @@
   border-color: var(--card-border);
   box-shadow: none;
 }
+
+/* Eigen team in de titel */
+.match-card-title .own-team {
+  font-weight: 800;
+}
+
+.match-card-title .other-team {
+  font-weight: 500;
+}
+
+/* Skeleton tijdens laden (PageLoader) */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skeleton-card {
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.skeleton-line,
+.skeleton-block {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--card-chip) 0%,
+    var(--card-inner) 50%,
+    var(--card-chip) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton-title {
+  height: 1.1rem;
+  width: 75%;
+}
+
+.skeleton-meta {
+  height: 0.8rem;
+  width: 35%;
+}
+
+.skeleton-block {
+  height: 3.2rem;
+}
+
+.skeleton-button {
+  height: 2.4rem;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line,
+  .skeleton-block {
+    animation: none;
+  }
+}
+
+/* Home: tegels Volgende wedstrijd / Laatste uitslag */
+.home-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.home-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 14px;
+  padding: 0.85rem 0.9rem;
+  color: var(--card-text);
+  text-decoration: none;
+  box-shadow: 0 4px 16px 0 rgba(25, 118, 210, 0.1);
+}
+
+.home-tile:hover {
+  border-color: var(--card-accent);
+}
+
+.home-tile-result {
+  border-left: 5px solid #90a4ae;
+}
+
+.home-tile-result.won {
+  border-left-color: #2e7d32;
+}
+
+.home-tile-result.lost {
+  border-left-color: #c62828;
+}
+
+.home-tile-result.won .match-result-badge {
+  background: #2e7d32;
+}
+
+.home-tile-result.lost .match-result-badge {
+  background: #c62828;
+}
+
+.home-tile-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--card-muted);
+}
+
+.home-tile-when {
+  font-size: 1.15rem;
+  color: var(--card-accent);
+}
+
+.home-tile-score {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-tile-score-value {
+  white-space: nowrap;
+}
+
+.home-tile-main {
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.home-tile-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--card-muted);
+}
+
+/* Home: meldingen voor Mijn team */
+.push-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 14px;
+  padding: 0.85rem 0.9rem;
+  margin-bottom: 1.25rem;
+  color: var(--card-text);
+}
+
+.push-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1 1 14rem;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.push-card-text strong {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  color: var(--card-accent);
+}
+
+.push-card-message {
+  color: var(--card-muted);
+  font-size: 0.82rem;
+}
+
+.push-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.push-card-actions .match-card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: auto;
+}
+
+.match-card-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

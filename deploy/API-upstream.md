@@ -49,7 +49,7 @@ Upstream-responses worden **60 seconden** gecached (`revalidate: 60` in `lib/ser
    npm ci
    npm run build
    ```
-2. Zorg dat Node/PM2 de app start (poort **3003**, zie `ecosystem.config.cjs`).
+2. Zorg dat Node/PM2 de app start (poort **3004**, zie `ecosystem.config.cjs`).
 3. Nginx blijft alles naar Next doorsturen (`deploy/nginx-vvh.clvs.nl.conf`) — geen aparte PHP-proxy nodig.
 4. Herstart de app:
    ```bash

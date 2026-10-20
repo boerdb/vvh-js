@@ -55,6 +55,7 @@ describe("teamcodes", () => {
 
   it("bouwt het Nevobo-pad en weigert onbekende prefixen", () => {
     expect(teamNevoboPath("MB1")).toBe("meiden-b/1");
+    expect(teamNevoboPath("L41")).toBe("l4/1");
     expect(() => teamNevoboPath("ZZ1")).toThrow();
   });
 });
