@@ -3,7 +3,8 @@ import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { CalendarClock, MapPin, Trophy } from "lucide-react";
 import { parseMatch } from "@/lib/parsers/match";
-import { isOwnTeamName, toDate } from "@/lib/parsers/rss-xml";
+import { getTeamLabel, VVH_WEDSTRIJD_TEAMS } from "@/lib/constants/teams";
+import { isOwnTeamName, matchesVvhTeam, toDate } from "@/lib/parsers/rss-xml";
 import { relativeDayLabel } from "@/lib/utils/relative-day";
 import type { FeedItem } from "@/lib/types/models";
 
@@ -14,7 +15,25 @@ function opponent(thuis: string, uit: string): string {
   return `${thuis} - ${uit}`;
 }
 
-function NextMatchTile({ item, teamFilter }: { item: FeedItem; teamFilter: string }) {
+interface TileProps {
+  item: FeedItem;
+  teamFilter: string;
+  /** Zonder Mijn team: erbij zetten welk VVH-team het is. */
+  showTeam: boolean;
+}
+
+/** Welk VVH-team speelt ("Heren 2"); nodig als de tegels voor de hele club zijn. */
+function vvhTeamLabel(item: FeedItem): string | null {
+  const team = VVH_WEDSTRIJD_TEAMS.find((t) => matchesVvhTeam(item, t.code));
+  return team ? getTeamLabel(team.code) : null;
+}
+
+function TeamLine({ item, showTeam }: { item: FeedItem; showTeam: boolean }) {
+  const label = showTeam ? vvhTeamLabel(item) : null;
+  return label ? <span className="home-tile-team">{label}</span> : null;
+}
+
+function NextMatchTile({ item, teamFilter, showTeam }: TileProps) {
   const match = parseMatch(item);
   const date = toDate(item.datum);
   if (!match || !date) return null;
@@ -26,6 +45,7 @@ function NextMatchTile({ item, teamFilter }: { item: FeedItem; teamFilter: strin
         <CalendarClock size={16} aria-hidden /> Volgende wedstrijd
       </span>
       <strong className="home-tile-when">{relativeDayLabel(date)}</strong>
+      <TeamLine item={item} showTeam={showTeam} />
       <span className="home-tile-main">
         {match.vvhThuis ? "Thuis" : "Uit"} tegen {opponent(match.thuis, match.uit)}
       </span>
@@ -38,7 +58,7 @@ function NextMatchTile({ item, teamFilter }: { item: FeedItem; teamFilter: strin
   );
 }
 
-function LastResultTile({ item, teamFilter }: { item: FeedItem; teamFilter: string }) {
+function LastResultTile({ item, teamFilter, showTeam }: TileProps) {
   const match = parseMatch(item);
   const date = toDate(item.datum);
   if (!match?.uitslag) return null;
@@ -64,6 +84,7 @@ function LastResultTile({ item, teamFilter }: { item: FeedItem; teamFilter: stri
           </span>
         )}
       </strong>
+      <TeamLine item={item} showTeam={showTeam} />
       <span className="home-tile-main">
         {match.vvhThuis ? "Thuis" : "Uit"} tegen {opponent(match.thuis, match.uit)}
       </span>
@@ -87,8 +108,10 @@ export function HomeHighlights({ next, lastResult, team }: HomeHighlightsProps) 
   const teamFilter = team ? `?team=${team}` : "";
   return (
     <div className="home-tiles">
-      {next && <NextMatchTile item={next} teamFilter={teamFilter} />}
-      {lastResult && <LastResultTile item={lastResult} teamFilter={teamFilter} />}
+      {next && <NextMatchTile item={next} teamFilter={teamFilter} showTeam={!team} />}
+      {lastResult && (
+        <LastResultTile item={lastResult} teamFilter={teamFilter} showTeam={!team} />
+      )}
     </div>
   );
 }

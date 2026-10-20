@@ -601,3 +601,10 @@
   opacity: 0.6;
   cursor: progress;
 }
+
+.home-tile-team {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--card-meta);
+}
