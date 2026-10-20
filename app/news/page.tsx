@@ -1,21 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { NewsCard } from "@/components/news/NewsCard";
+import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { getNews } from "@/lib/api/news";
 import type { NewsItem } from "@/lib/types/models";
+import { useFeedLoader } from "@/hooks/useFeedLoader";
 
 export default function NewsPage() {
-  const [items, setItems] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getNews()
-      .then(setItems)
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: items, loading, error, reload } = useFeedLoader<NewsItem[]>(
+    getNews,
+    []
+  );
 
   return (
     <div className="page-container">
@@ -23,6 +19,8 @@ export default function NewsPage() {
       <p className="page-subtitle">Laatste berichten van VVH Harlingen</p>
       {loading ? (
         <PageLoader message="Nieuws laden..." />
+      ) : error ? (
+        <ErrorState message="Kon het clubnieuws niet laden." onRetry={reload} />
       ) : (
         <div className="cards-list">
           {items.map((item, i) => (

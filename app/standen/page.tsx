@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback } from "react";
+import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import { StandingsTable } from "@/components/standings/StandingsTable";
@@ -13,7 +14,7 @@ import { useTeamFilter } from "@/hooks/useTeamFilter";
 function StandenContent() {
   const { teamFilter, setTeamFilter } = useTeamFilter({ allowAll: false });
   const loader = useCallback(() => getStanden(teamFilter), [teamFilter]);
-  const { data: result, loading } = useFeedLoader<StandenResult | null>(
+  const { data: result, loading, error, reload } = useFeedLoader<StandenResult | null>(
     loader,
     null
   );
@@ -33,8 +34,11 @@ function StandenContent() {
       </div>
       {loading ? (
         <PageLoader message="Standen laden..." />
-      ) : !result ? (
-        <p className="empty-state">Kon standen niet laden.</p>
+      ) : error || !result ? (
+        <ErrorState
+          message={`Kon de stand van ${getTeamLabel(teamFilter)} niet laden.`}
+          onRetry={reload}
+        />
       ) : (
         <StandingsTable
           key={teamFilter}

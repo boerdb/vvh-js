@@ -258,6 +258,24 @@ body {
   padding: 1.5rem;
 }
 
+.error-state {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--shell-text-muted);
+}
+
+.error-state p:first-child {
+  font-weight: 600;
+  color: inherit;
+}
+
+.error-state-hint {
+  margin: 0.35rem 0 1rem;
+  font-size: 0.9rem;
+}
+
 /* Side menu overlay */
 .menu-overlay {
   position: fixed;

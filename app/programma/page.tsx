@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useMemo } from "react";
 import { MatchCard } from "@/components/matches/MatchCard";
+import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import { getProgramma } from "@/lib/api/nevobo";
@@ -13,7 +14,7 @@ import { ALL_TEAMS, useTeamFilter } from "@/hooks/useTeamFilter";
 
 function ProgrammaContent() {
   const loader = useCallback(() => getProgramma(), []);
-  const { data: items, loading } = useFeedLoader<FeedItem[]>(loader, []);
+  const { data: items, loading, error, reload } = useFeedLoader<FeedItem[]>(loader, []);
   const { teamFilter, setTeamFilter } = useTeamFilter({
     teams: VVH_WEDSTRIJD_TEAMS,
   });
@@ -43,6 +44,8 @@ function ProgrammaContent() {
       </div>
       {loading ? (
         <PageLoader message="Programma laden..." />
+      ) : error ? (
+        <ErrorState message="Kon het programma niet laden." onRetry={reload} />
       ) : (
         <div className="cards-list">
           {filtered.map((item, i) => (

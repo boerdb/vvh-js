@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useMemo } from "react";
 import { MatchCard } from "@/components/matches/MatchCard";
+import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
 import { TeamFilter } from "@/components/layout/TeamFilter";
 import { getProgramma } from "@/lib/api/nevobo";
@@ -22,7 +23,7 @@ function WaddenhalContent() {
     () => getProgramma().then((all) => all.filter(isWaddenhalMatch)),
     []
   );
-  const { data: items, loading } = useFeedLoader<FeedItem[]>(loader, []);
+  const { data: items, loading, error, reload } = useFeedLoader<FeedItem[]>(loader, []);
   const { teamFilter, setTeamFilter } = useTeamFilter({
     teams: VVH_WEDSTRIJD_TEAMS,
   });
@@ -52,6 +53,8 @@ function WaddenhalContent() {
       </div>
       {loading ? (
         <PageLoader message="Wedstrijden laden..." />
+      ) : error ? (
+        <ErrorState message="Kon de thuiswedstrijden niet laden." onRetry={reload} />
       ) : (
         <div className="cards-list">
           {filtered.map((item, i) => (
