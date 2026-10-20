@@ -5,6 +5,8 @@ const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
   swDest: "public/sw.js",
   disable: process.env.NODE_ENV === "development",
+  // Niet public/splash: iOS haalt alleen de eigen splash op, niet alle 42.
+  globPublicPatterns: ["*", "icons/**"],
 });
 
 const nextConfig: NextConfig = {

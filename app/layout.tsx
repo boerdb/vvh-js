@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { SerwistProvider } from "@/components/providers/SerwistProvider";
+import { SPLASH_STARTUP_IMAGES } from "@/lib/constants/splash";
 import "./globals.css";
 
 const themeInitScript = `
@@ -39,7 +40,10 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "VVH",
+    startupImage: SPLASH_STARTUP_IMAGES,
   },
+  // Next zet alleen mobile-web-app-capable; oudere iOS toont het opstartscherm alleen hiermee.
+  other: { "apple-mobile-web-app-capable": "yes" },
 };
 
 export const viewport: Viewport = {

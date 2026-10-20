@@ -35,4 +35,45 @@ async function writeIcon(file, size) {
 }
 
 await Promise.all(outputs.map(({ file, size }) => writeIcon(file, size)));
+
+// iOS-splash screens: zelfde verloop als de icon, beeldmerk gecentreerd.
+// Formaten staan in lib/constants/splash-devices.json (ook gebruikt door app/layout.tsx).
+const devices = JSON.parse(
+  await readFile(path.join(root, "lib/constants/splash-devices.json"), "utf8")
+);
+const artwork = Buffer.from(
+  svg.toString("utf8").replace(/<rect width="512" height="512" fill="url\(#bg\)"\/>/, "")
+);
+
+async function writeSplash(width, height) {
+  const out = path.join(root, "public/splash", `splash-${width}x${height}.png`);
+  const artSize = Math.round(Math.min(width, height) * 0.55);
+  const background = Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+      <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1a4a9c"/><stop offset="1" stop-color="#0b2257"/>
+      </linearGradient></defs>
+      <rect width="100%" height="100%" fill="url(#bg)"/>
+    </svg>`
+  );
+  const art = await sharp(artwork, { density: (72 * artSize) / 512 * 2 })
+    .resize(artSize, artSize)
+    .png()
+    .toBuffer();
+  await sharp(background)
+    .composite([{ input: art, gravity: "centre" }])
+    .png({ compressionLevel: 9, palette: true })
+    .toFile(out);
+}
+
+await mkdir(path.join(root, "public/splash"), { recursive: true });
+const splashSizes = new Set();
+for (const { width, height, ratio } of devices) {
+  splashSizes.add(`${width * ratio}x${height * ratio}`);
+  splashSizes.add(`${height * ratio}x${width * ratio}`);
+}
+await Promise.all(
+  [...splashSizes].map((size) => writeSplash(...size.split("x").map(Number)))
+);
+console.log(`Wrote ${splashSizes.size} splash screens in public/splash`);
 console.log("Done.");

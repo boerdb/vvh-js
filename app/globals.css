@@ -16,9 +16,52 @@
   --scrollbar-track: #e8ecf1;
   --scrollbar-thumb: #94a3b8;
   --scrollbar-thumb-hover: #64748b;
+
+  /* Wedstrijdkaarten en standen (styles/competition.css); alle tekst ≥ 4,5:1 */
+  --card-bg: #e3f2fd;
+  --card-border: #bbdefb;
+  --card-inner: #ffffff;
+  --card-chip: #eceff1;
+  --card-text: #1e2d42;
+  --card-muted: #37474f;
+  --card-accent: #1259a8;
+  --card-meta: #8a5300;
+  --card-tag-bg: #cfe3f7;
+  --card-tag-text: #0d47a1;
+  --card-th-bg: rgba(25, 118, 210, 0.12);
+  --card-row-border: rgba(187, 222, 251, 0.6);
+  --card-highlight: #fffde7;
+  --card-highlight-text: #16365f;
+  --card-danger: #c62828;
+  --card-danger-bg: rgba(198, 40, 40, 0.12);
+  --card-image-bg: linear-gradient(160deg, #ffffff 0%, #eef6fc 45%, #d4e8f8 100%);
+  --notice-bg: #fff4d6;
+  --notice-border: #ffd27a;
+  --notice-text: #8a5a00;
 }
 
 .dark {
+  --card-bg: #16233d;
+  --card-border: #24385e;
+  --card-inner: #1d2d4c;
+  --card-chip: #2a3b5c;
+  --card-text: #e2e8f0;
+  --card-muted: #b3c0d3;
+  --card-accent: #8cc4ff;
+  --card-meta: #ffc94d;
+  --card-tag-bg: #223a63;
+  --card-tag-text: #a9d2ff;
+  --card-th-bg: #1c2f52;
+  --card-row-border: #24385e;
+  --card-highlight: #2e2a1a;
+  --card-highlight-text: #ffe08a;
+  --card-danger: #ff8a80;
+  --card-danger-bg: rgba(255, 138, 128, 0.14);
+  --card-image-bg: #1d2d4c;
+  --notice-bg: #2e2a1a;
+  --notice-border: #6b5a1f;
+  --notice-text: #ffe08a;
+
   --shell-bg: #0b0f19;
   --shell-text: #f5f8ff;
   --shell-text-muted: #94a3b8;
@@ -50,16 +93,75 @@ body {
   color: var(--shell-text);
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
   height: 100%;
+  /* Geen overflow: hidden op body (iOS 26-strook, zie hieronder); de shell is fixed. */
+  overscroll-behavior: none;
+}
+
+/*
+ * iOS 26 standalone met black-translucent statusbalk: viewport is één
+ * statusbalkhoogte te kort (WebKit 301108) → donkere strook onder de tabbalk.
+ * Shell zelf NIET hoger maken; WebKit knipt fixed inhoud dan af.
+ */
+@media (display-mode: standalone) {
+  html {
+    min-height: min(100lvh, calc(100% + env(safe-area-inset-top)));
+  }
+}
+
+/* Full-height shell: header/banners en tabbalk vast, alleen main scrolt */
+.app-shell {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-/* Full-height shell: header/banners fixed, scroll only in main */
-.app-shell {
+/* Tabbalk onderin */
+.tab-bar {
+  flex-shrink: 0;
+  z-index: 30;
+  background: var(--shell-page-bg);
+  border-top: 1px solid var(--shell-border);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.tab-bar-inner {
+  display: flex;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.tab-bar-item {
+  flex: 1;
+  min-width: 0;
+  min-height: 3.25rem;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
-  max-height: 100dvh;
-  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.4rem 0 0.3rem;
+  border: none;
+  background: none;
+  color: var(--shell-text-muted);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab-bar-item.active {
+  color: var(--card-accent);
+}
+
+.tab-bar-item:focus-visible {
+  outline: 2px solid var(--card-accent);
+  outline-offset: -4px;
+  border-radius: 0.5rem;
 }
 
 /* App shell */
@@ -283,9 +385,9 @@ body {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: #8a5a00;
-  background: #fff4d6;
-  border: 1px solid #ffd27a;
+  color: var(--notice-text);
+  background: var(--notice-bg);
+  border: 1px solid var(--notice-border);
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;
   margin: 0 0 1rem;
@@ -686,8 +788,8 @@ body {
 .club-info-btn-secondary {
   margin-top: 0.5rem;
   background: transparent !important;
-  color: #1976d2 !important;
-  border: 1.5px solid #1976d2;
+  color: var(--card-accent) !important;
+  border: 1.5px solid var(--card-accent);
   text-align: center;
   display: block;
   text-decoration: none;
@@ -722,4 +824,21 @@ body {
   max-width: 36rem;
   margin: 0.35rem auto 0;
   padding: 0 1rem 1.5rem;
+}
+
+.version-notes-title {
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.version-notes ul {
+  display: inline-block;
+  text-align: left;
+  margin: 0;
+  padding-left: 1.1rem;
+  list-style: disc;
+}
+
+.version-notes li + li {
+  margin-top: 0.2rem;
 }

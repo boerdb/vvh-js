@@ -1,9 +1,9 @@
-/* Fixed competition colors — unchanged in light/dark shell themes */
+/* Kaart- en standenkleuren: tokens --card-* in app/globals.css (licht en donker) */
 
 .match-card {
-  background: #e3f2fd;
+  background: var(--card-bg);
   border-radius: 14px;
-  border: 1.5px solid #bbdefb;
+  border: 1.5px solid var(--card-border);
   box-shadow: 0 4px 16px 0 rgba(25, 118, 210, 0.1);
   overflow: hidden;
 }
@@ -13,7 +13,7 @@
 }
 
 .match-card-title {
-  color: #1976d2;
+  color: var(--card-accent);
   font-size: 1.05rem;
   font-weight: 700;
   margin: 0;
@@ -21,7 +21,7 @@
 }
 
 .match-card-subtitle {
-  color: #ffb300;
+  color: var(--card-meta);
   font-size: 0.88rem;
   margin: 0.35rem 0 0;
   font-weight: 600;
@@ -32,8 +32,8 @@
 }
 
 .match-description {
-  color: #333;
-  background: #fffde7;
+  color: var(--card-text);
+  background: var(--card-highlight);
   border-radius: 8px;
   padding: 0.75rem;
   font-size: 0.9rem;
@@ -73,15 +73,15 @@
   margin-left: 0.5rem;
   padding: 0.1rem 0.45rem;
   border-radius: 4px;
-  background: rgba(25, 118, 210, 0.15);
-  color: #1976d2;
+  background: var(--card-tag-bg);
+  color: var(--card-tag-text);
   font-size: 0.75rem;
 }
 
 /* Standings */
 .standen-container {
   padding: 0 0 2rem;
-  color: #1e2d42;
+  color: var(--card-text);
 }
 
 .standen-header {
@@ -93,12 +93,12 @@
   font-size: clamp(1.7rem, 4vw, 2rem);
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #1e2d42;
+  color: var(--card-text);
 }
 
 .section-subtitle-comp {
   margin: 0.4rem 0 1rem;
-  color: #4c627f;
+  color: var(--card-muted);
   font-size: 0.95rem;
 }
 
@@ -111,15 +111,15 @@
 .meta-item {
   min-width: 0;
   container-type: inline-size;
-  background: #e3f2fd;
-  border: 1px solid #bbdefb;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 12px;
   padding: 0.6rem 0.5rem;
 }
 
 .meta-label {
   display: block;
-  color: #4c627f;
+  color: var(--card-muted);
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -128,7 +128,7 @@
 
 .meta-value {
   display: block;
-  color: #1976d2;
+  color: var(--card-accent);
   font-weight: 700;
   margin-top: 0.25rem;
   line-height: 1.25;
@@ -149,9 +149,9 @@
 }
 
 .stand-card {
-  background: #e3f2fd;
+  background: var(--card-bg);
   border-radius: 16px;
-  border: 1.5px solid #bbdefb;
+  border: 1.5px solid var(--card-border);
   box-shadow: 0 4px 16px 0 rgba(25, 118, 210, 0.1);
   padding: 0.5rem;
   overflow-x: auto;
@@ -166,8 +166,8 @@
 }
 
 .stand-table thead th {
-  background: rgba(25, 118, 210, 0.12);
-  color: #1976d2;
+  background: var(--card-th-bg);
+  color: var(--card-accent);
   font-weight: 700;
   padding: 0.55rem 0.35rem;
   text-align: left;
@@ -175,16 +175,16 @@
 
 .stand-table tbody td {
   padding: 0.5rem 0.35rem;
-  border-bottom: 1px solid rgba(187, 222, 251, 0.6);
-  color: #1e2d42;
+  border-bottom: 1px solid var(--card-row-border);
+  color: var(--card-text);
 }
 
 .stand-table tbody tr.highlight-vvh {
-  background: #fffde7;
+  background: var(--card-highlight);
 }
 
 .stand-table tbody tr.highlight-vvh td {
-  color: #16365f;
+  color: var(--card-highlight-text);
   font-weight: 700;
 }
 
@@ -236,12 +236,7 @@
   padding: 0.3rem;
   line-height: 0;
   border-radius: 14px;
-  background: linear-gradient(
-    160deg,
-    #ffffff 0%,
-    #eef6fc 45%,
-    #d4e8f8 100%
-  );
+  background: var(--card-image-bg);
   border: 1px solid rgba(25, 118, 210, 0.22);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
@@ -285,13 +280,13 @@
 }
 
 .match-card-btn.secondary {
-  background: #fff;
-  color: #1976d2;
-  border: 1.5px solid #1976d2;
+  background: var(--card-inner);
+  color: var(--card-accent);
+  border: 1.5px solid var(--card-accent);
 }
 
 .match-card-btn.secondary:hover {
-  background: #bbdefb;
+  background: var(--card-border);
 }
 
 .match-result {
@@ -299,7 +294,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  background: #fff;
+  background: var(--card-inner);
   border-radius: 8px;
   border-left: 5px solid #90a4ae;
   padding: 0.6rem 0.75rem;
@@ -319,7 +314,7 @@
   gap: 0.35rem;
   font-size: 1.6rem;
   font-weight: 800;
-  color: #1e2d42;
+  color: var(--card-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -359,8 +354,8 @@
 .match-sets li {
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
-  color: #37474f;
-  background: #eceff1;
+  color: var(--card-muted);
+  background: var(--card-chip);
   border-radius: 4px;
   padding: 0.1rem 0.4rem;
 }
@@ -369,7 +364,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
-  color: #37474f;
+  color: var(--card-muted);
   font-size: 0.9rem;
   margin: 0 0 0.75rem;
 }
@@ -377,10 +372,15 @@
 .match-location svg {
   flex-shrink: 0;
   margin-top: 0.15rem;
-  color: #1976d2;
+  color: var(--card-accent);
 }
 
 .vervallen-tag {
-  background: rgba(198, 40, 40, 0.12);
-  color: #c62828;
+  background: var(--card-danger-bg);
+  color: var(--card-danger);
+}
+
+.dark .news-card-image-wrap {
+  border-color: var(--card-border);
+  box-shadow: none;
 }

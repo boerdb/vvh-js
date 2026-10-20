@@ -12,6 +12,7 @@ import {
 } from "react";
 import { BannerStack } from "./BannerStack";
 import { SideMenu } from "./SideMenu";
+import { TabBar } from "./TabBar";
 
 interface MenuContextValue {
   openMenu: () => void;
@@ -66,6 +67,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main className={`main-content ${isHome ? "home-layout" : ""}`}>
           {children}
         </main>
+
+        <TabBar onMore={openMenu} menuOpen={menuOpen} />
       </div>
     </MenuContext.Provider>
   );

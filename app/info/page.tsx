@@ -1,4 +1,21 @@
 import Link from "next/link";
+import packageJson from "@/package.json";
+
+const { version } = packageJson;
+
+/** Alleen de wijzigingen van de huidige versie; bij een nieuwe release vervangen. */
+const RELEASE_NOTES = [
+  "Mijn team: tik op de ster naast het teamfilter en je ziet overal eerst je eigen team, ook op Home.",
+  "Wedstrijden in je agenda zetten, of abonneren op de agenda van je team.",
+  "Uitslagen per speeldag, met de score groot, gewonnen of verloren en de setstanden.",
+  "Speellocatie, thuis/uit en afgelaste wedstrijden direct zichtbaar op elke wedstrijd.",
+  "Standen tonen de echte poulenaam, met de competitie boven de beker.",
+  "Werkt ook zonder bereik: je ziet dan de laatst opgehaalde gegevens.",
+  "Duidelijke melding met 'Opnieuw proberen' als gegevens niet laden.",
+  "Tabbalk onderin: Home, Programma, Uitslagen en Standen met één tik.",
+  "Wedstrijdkaarten en standen passen zich aan de donkere modus aan, met beter leesbare datums.",
+  "Nieuwe app-icon en een opstartscherm op iPhone en iPad.",
+];
 
 export default function InfoPage() {
   return (
@@ -77,15 +94,16 @@ export default function InfoPage() {
       </article>
 
       <p className="copyright-text">
-        © 2026 Clinical Vision | V 1.1.4 | Alle rechten voorbehouden.
+        © 2026 Clinical Vision | V {version} | Alle rechten voorbehouden.
       </p>
-      <p className="version-notes">
-        1.1.4 — Volley Stars L4 1 als filter in programma en thuiswedstrijden
-        (niet in standen; het is een bloktoernooi).
-        <br />
-        1.1.3 — Meisjes A1 (combinatie Dosko/Acta) toegevoegd aan programma,
-        uitslagen en standen.
-      </p>
+      <section className="version-notes" aria-label={`Nieuw in versie ${version}`}>
+        <p className="version-notes-title">Nieuw in versie {version}</p>
+        <ul>
+          {RELEASE_NOTES.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
