@@ -47,10 +47,12 @@ export async function sendToSubscriptions(
   await Promise.all(
     subscriptions.map(async (sub) => {
       try {
+        // Zelfde opties als med-pwa (werkt op iPhone met de app dicht): geen
+        // urgency/topic; TTL 24 uur zodat een uitgeschakelde telefoon hem later krijgt.
         await webpush.sendNotification(
           { endpoint: sub.endpoint, keys: sub.keys },
           body,
-          { TTL: 6 * 60 * 60, urgency: "normal", topic: payload.tag.slice(0, 32) }
+          { TTL: 24 * 60 * 60 }
         );
         sent++;
       } catch (error) {
