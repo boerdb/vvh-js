@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useMemo } from "react";
-import { CalendarSync } from "lucide-react";
+import { AgendaSubscribe } from "@/components/matches/AgendaSubscribe";
 import { MatchList } from "@/components/matches/MatchList";
 import { ErrorState } from "@/components/layout/ErrorState";
 import { PageLoader } from "@/components/layout/PageLoader";
@@ -51,20 +51,7 @@ function ProgrammaContent() {
           teams={VVH_WEDSTRIJD_TEAMS}
         />
       </div>
-      {teamFilter !== ALL_TEAMS && (
-        <a
-          className="agenda-subscribe"
-          href={`/api/agenda?team=${teamFilter}`}
-          onClick={(event) => {
-            // webcal:// laat de agenda-app een abonnement maken i.p.v. eenmalig importeren.
-            event.preventDefault();
-            window.location.href = `webcal://${window.location.host}/api/agenda?team=${teamFilter}`;
-          }}
-        >
-          <CalendarSync size={16} aria-hidden />
-          Abonneer op de agenda van {getTeamLabel(teamFilter)}
-        </a>
-      )}
+      {teamFilter !== ALL_TEAMS && <AgendaSubscribe team={teamFilter} />}
       <StaleNotice fetchedAt={fetchedAt} />
       {loading ? (
         <PageLoader message="Programma laden..." />

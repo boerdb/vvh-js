@@ -358,12 +358,64 @@ body {
   margin: 0 0 0.5rem;
 }
 
+.agenda-subscribe-box {
+  margin-bottom: 1rem;
+}
+
+button.agenda-subscribe {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.agenda-subscribe svg.rotated {
+  transform: rotate(180deg);
+}
+
+.agenda-panel {
+  margin-top: 0.6rem;
+  background: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: 14px;
+  padding: 0.85rem 0.9rem;
+  color: var(--card-text);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.agenda-panel p {
+  margin: 0 0 0.6rem;
+}
+
+.agenda-panel ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+  margin: 0 0 0.85rem;
+}
+
+.agenda-panel li + li {
+  margin-top: 0.3rem;
+}
+
+.agenda-panel .match-card-actions {
+  margin-bottom: 0.6rem;
+}
+
+.agenda-panel-hint {
+  color: var(--card-muted);
+  font-size: 0.82rem;
+  margin: 0 !important;
+}
+
 .agenda-subscribe,
 .home-all-link {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  color: #1976d2;
+  color: var(--card-accent);
   font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
