@@ -60,6 +60,14 @@ function readTeam(): string | null {
 
 const TEAM_CHANGE_EVENT = "vvh-push-team-change";
 
+/** Team dat de server voor dit toestel kent, of null als het niet aangemeld is. */
+async function serverTeam(endpoint: string): Promise<string | null> {
+  const data = (await postJson("/api/push", "POST", { action: "status", endpoint })) as {
+    team: string | null;
+  };
+  return data.team;
+}
+
 function writeTeam(team: string | null) {
   try {
     if (team) localStorage.setItem(TEAM_KEY, team);
@@ -75,12 +83,19 @@ function writeTeam(team: string | null) {
  * het abonnement stil verplaatst (toestemming is er al, dus geen vraag op het scherm).
  */
 export async function followMyTeamWithPush(team: string): Promise<void> {
-  const current = readTeam();
-  if (!current || current === team) return;
+  if (readTeam() === team) return;
   if (!("Notification" in window) || Notification.permission !== "granted") return;
   try {
+    // Niet op de lokale waarde vertrouwen (kan ontbreken op iOS): is er een
+    // abonnement, vraag dan de server welk team het volgt.
     const sub = await (await registration())?.pushManager.getSubscription();
     if (!sub) return;
+    const current = await serverTeam(sub.endpoint);
+    if (current === team) {
+      writeTeam(team);
+      return;
+    }
+    if (!current) return; // Meldingen staan uit; niet ongevraagd aanzetten.
     await postJson("/api/push", "POST", { subscription: sub.toJSON(), team });
     writeTeam(team);
   } catch (error) {
@@ -110,7 +125,12 @@ export function usePushSubscription() {
         if (!reg || !keyRes?.ok) return "unavailable";
         if (Notification.permission === "denied") return "denied";
         const sub = await reg.pushManager.getSubscription();
-        if (active) setSubscribedTeam(sub ? readTeam() : null);
+        // De server is de bron; lokaal alleen bijwerken zodat de rest het weet.
+        const team = sub ? await serverTeam(sub.endpoint).catch(() => readTeam()) : null;
+        if (active) {
+          writeTeam(team);
+          setSubscribedTeam(team);
+        }
         return "ready";
       })();
       if (active) setStatus(next);

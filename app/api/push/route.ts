@@ -46,6 +46,16 @@ export async function POST(request: Request) {
   if (!pushEnabled()) return disabled();
   const body = (await request.json().catch(() => ({}))) as SubscriptionBody;
 
+  if (body.action === "status") {
+    // Welk team dit toestel volgt (in de body, want het endpoint is een geheim adres).
+    if (!isEndpoint(body.endpoint)) {
+      return NextResponse.json({ error: "Ongeldig toestel" }, { status: 400 });
+    }
+    const { subscriptions } = await readPushData();
+    const sub = subscriptions.find((s) => s.endpoint === body.endpoint);
+    return NextResponse.json({ team: sub?.team ?? null });
+  }
+
   if (body.action === "test") {
     if (!isEndpoint(body.endpoint)) {
       return NextResponse.json({ error: "Ongeldig toestel" }, { status: 400 });
@@ -91,6 +101,7 @@ export async function POST(request: Request) {
     return true;
   });
   if (!ok) return NextResponse.json({ error: "Te veel abonnementen" }, { status: 507 });
+  console.log(`[push] toestel aangemeld voor ${team} (${new URL(endpoint).host})`);
   return NextResponse.json({ ok: true, team });
 }
 
