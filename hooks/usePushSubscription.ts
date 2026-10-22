@@ -58,12 +58,34 @@ function readTeam(): string | null {
   }
 }
 
+const TEAM_CHANGE_EVENT = "vvh-push-team-change";
+
 function writeTeam(team: string | null) {
   try {
     if (team) localStorage.setItem(TEAM_KEY, team);
     else localStorage.removeItem(TEAM_KEY);
   } catch {
     // Zonder opslag weet de app na herladen alleen niet welk team aan staat.
+  }
+  window.dispatchEvent(new Event(TEAM_CHANGE_EVENT));
+}
+
+/**
+ * Meldingen gaan mee met Mijn team: staan ze aan voor een ander team, dan wordt
+ * het abonnement stil verplaatst (toestemming is er al, dus geen vraag op het scherm).
+ */
+export async function followMyTeamWithPush(team: string): Promise<void> {
+  const current = readTeam();
+  if (!current || current === team) return;
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  try {
+    const sub = await (await registration())?.pushManager.getSubscription();
+    if (!sub) return;
+    await postJson("/api/push", "POST", { subscription: sub.toJSON(), team });
+    writeTeam(team);
+  } catch (error) {
+    // Lukt het niet (offline), dan blijft het oude team staan; Home toont dan "Omzetten".
+    console.error("[push] team wijzigen mislukt", error);
   }
 }
 
@@ -93,8 +115,12 @@ export function usePushSubscription() {
       })();
       if (active) setStatus(next);
     })();
+    // Team kan elders wijzigen (ster bij het teamfilter → followMyTeamWithPush).
+    const onTeamChange = () => setSubscribedTeam(readTeam());
+    window.addEventListener(TEAM_CHANGE_EVENT, onTeamChange);
     return () => {
       active = false;
+      window.removeEventListener(TEAM_CHANGE_EVENT, onTeamChange);
     };
   }, []);
 

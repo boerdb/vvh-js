@@ -2,6 +2,7 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 import { getTeamOption } from "@/lib/constants/teams";
+import { followMyTeamWithPush } from "@/hooks/usePushSubscription";
 
 const STORAGE_KEY = "vvh-my-team";
 const CHANGE_EVENT = "vvh-my-team-change";
@@ -36,6 +37,8 @@ export function useMyTeam() {
       // Privémodus zonder opslag: dan alleen geen voorkeur onthouden.
     }
     window.dispatchEvent(new Event(CHANGE_EVENT));
+    // Meldingen gaan mee naar het nieuwe team (als ze aan staan).
+    if (code) void followMyTeamWithPush(code);
   }, []);
 
   return { myTeam, setMyTeam };

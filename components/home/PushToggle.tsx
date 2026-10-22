@@ -2,13 +2,22 @@
 
 import { Bell, BellOff, BellRing } from "lucide-react";
 import { getTeamLabel } from "@/lib/constants/teams";
-import { usePushSubscription } from "@/hooks/usePushSubscription";
+import { useEffect } from "react";
+import { followMyTeamWithPush, usePushSubscription } from "@/hooks/usePushSubscription";
 
 /** Meldingen voor Mijn team: nieuwe uitslag, andere aanvangstijd, vervallen. */
 export function PushToggle({ team }: { team: string }) {
   const { status, subscribedTeam, busy, message, enable, disable, sendTest } =
     usePushSubscription();
   const label = getTeamLabel(team);
+
+  // Bestaande abonnementen op een oud team (van vóór "meldingen volgen Mijn team")
+  // gaan vanzelf mee zodra Home opent.
+  useEffect(() => {
+    if (status === "ready" && subscribedTeam && subscribedTeam !== team) {
+      void followMyTeamWithPush(team);
+    }
+  }, [status, subscribedTeam, team]);
 
   if (status === "loading" || status === "unavailable" || status === "unsupported") {
     return null;
