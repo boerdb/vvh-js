@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "icons": "node scripts/generate-icons.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "bezoek:rapport": "node scripts/bezoek_rapport.mjs"
   },
   "dependencies": {
     "date-fns": "^4.1.0",

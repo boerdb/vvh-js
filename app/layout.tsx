@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppShell } from "@/components/layout/AppShell";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { BezoekTeller } from "@/components/providers/BezoekTeller";
 import { SerwistProvider } from "@/components/providers/SerwistProvider";
 import { SPLASH_STARTUP_IMAGES } from "@/lib/constants/splash";
 import "./globals.css";
@@ -71,6 +72,7 @@ export default function RootLayout({
         </Script>
         <SerwistProvider swUrl="/sw.js">
           <ThemeProvider>
+            <BezoekTeller />
             <AppShell>{children}</AppShell>
           </ThemeProvider>
         </SerwistProvider>
