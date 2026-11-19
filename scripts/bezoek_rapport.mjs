@@ -18,7 +18,7 @@ import { join } from "node:path";
 const uitvoer = process.argv[2] ?? join(homedir(), "Desktop", "VVH bezoekers.txt");
 const lokaal = process.argv[3];
 
-const host = process.env.VVH_SSH_HOST ?? "root@192.168.1.32";
+const host = process.env.VVH_SSH_HOST ?? "root@85.10.144.42";
 const sleutel = process.env.VVH_SSH_KEY ?? join(homedir(), ".ssh", "id_ed25519_homelab");
 const bestand = process.env.VVH_BEZOEK_BESTAND ?? "/var/www/vvh-js/data/bezoek.json";
 
